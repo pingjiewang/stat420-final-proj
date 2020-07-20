@@ -1,0 +1,76 @@
+---
+title: 'Final Project - First look at the dataset'
+author: "STAT 420, Summer 2020, Final project by (A-Team)"
+date: 'July 20, 2020'
+output:
+  html_document: 
+    theme: readable
+    toc: yes  
+  pdf_document: default
+urlcolor: cyan
+---
+
+***
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
+options(scipen = 1, digits = 4, width = 80)
+library(knitr)
+opts_chunk$set(cache = TRUE, autodep = TRUE)
+```
+
+### https://www.kaggle.com/orgesleka/used-cars-database
+
+# Loading data
+
+```{r,warning=FALSE}
+library(readr)
+autos <- read_csv("autos.csv")
+str(autos)
+
+
+```
+
+
+# data cleaning
+
+```{r}
+autos=subset(autos, price>0)
+
+columns_remove=c("postalCode","lastSeen", "nrOfPictures","dateCreated","dateCrawled")   
+columns_numeric = c("price","powerPS", "kilometer")
+columns_factor = c("seller","offerType","abtest","vehicleType","gearbox","model","brand","monthOfRegistration","fuelType","notRepairedDamage" )
+other_columns = c("name","yearOfRegistration" ) 
+
+autos[,columns_factor]=lapply(autos[,columns_factor], as.factor)
+autos1 = autos[, -which(names(autos) %in% columns_remove)]
+
+str(autos1)
+```
+
+
+# Pplit out a training set
+
+```{r}
+size_train=2000
+idx_train=sample(1:nrow(autos1),size_train)
+autos_train=autos1[idx_train,]
+```
+
+
+# Examine numeric columns
+
+```{r}
+data1 = autos_train[, columns_numeric ]
+pairs(data1,col="dodgerblue")
+```
+
+
+```{r fig.height=6, fig.width=6,eval=FALSE}
+cardio_train=subset (cardio_train, )
+data1 = autos_train[, -which(names(cardio_train) %in% factor_columns)]
+pairs(data1,col="dodgerblue")
+
+```
+
+
+
