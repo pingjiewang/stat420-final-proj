@@ -1,0 +1,122 @@
+---
+title: 'Building a price prediction model for eBay Germany Used Car listings'
+author: "Richa Gupta/Sandro Tanis/Ping Wang"
+course: "STAT 420, Summer 2020"
+date: 'Aug 07, 2020'
+output:
+  html_document: 
+    theme: readable
+    toc: yes  
+  pdf_document: default
+urlcolor: cyan
+---
+
+***
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
+options(scipen = 1, digits = 4, width = 80)
+library(knitr)
+opts_chunk$set(cache = TRUE, autodep = TRUE)
+```
+
+# 1. Introduction
+
+# 2. Methods
+
+## 2.1 Data cleanning and exploration
+
+Loading for raw data
+```{r,warning=FALSE,message=FALSE}
+library(readr)
+autos_raw <- read_csv("autos.csv")
+str(autos_raw)
+```
+
+
+## 2.1.1 Data cleaning and preparation
+
+```{r}
+autos=subset(autos_raw, price>0)
+
+columns_remove=c("postalCode","lastSeen", "nrOfPictures","dateCreated","dateCrawled","monthOfRegistration",)   
+columns_numeric = c("price","powerPS", "kilometer")
+columns_factor = c("seller","offerType","abtest","vehicleType","gearbox","model","brand","fuelType","notRepairedDamage" )
+other_columns = c("name","yearOfRegistration" ) 
+
+autos[,columns_factor]=lapply(autos[,columns_factor], as.factor)
+autos = autos[, -which(names(autos) %in% columns_remove)]
+
+str(autos)
+
+```
+
+## 2.1.2 perform box-cox tranformation on continuous variables only (to estabish transformation form )
+ Eg. model = lm(xxx(price)~powerPS+kilometer)
+
+
+#### check for colinearity
+
+#### check for violation of model assumption
+  QQplot, fitted vs residual
+  BP test, Sharpio.wilk test
+
+## 2.1.3 combine continous variables(wiht established form) with all factor varible to start a backward AIC to find a good model.
+  model_aim_start = lm(log(price)~powerPS+kilometer+(factor varilable)^2,
+
+##  2.1.4 remove high influence data and refit the choose model
+
+
+TEST result?
+
+LOOC_RMSE
+CV 
+
+
+
+
+
+## 2.1.2 Data exploration to find the relationship between continous variables
+
+```{r}
+library(dplyr)
+autos=na.omit(autos)
+autos_factor_groups=autos %>% count (seller,offerType,abtest,vehicleType,gearbox,model,brand,fuelType,notRepairedDamage)
+autos_factor_groups=autos_factor_groups[order(autos_factor_groups$n,decreasing = TRUE),]
+#sort the nu
+
+#data1 = autos_factor_groups[, columns_numeric ]
+#pairs(data1,col="dodgerblue")
+```
+
+
+## split out a training set
+
+```{r, eval=FALSE}
+size_train=2000
+idx_train=sample(1:nrow(autos1),size_train)
+autos_train=autos[idx_train,]
+```
+
+## 2.1.2 
+
+### Examine only numeric columns first
+
+
+
+
+
+
+
+
+
+
+
+# 3. Results
+
+# 4. Discussion
+
+# 5. Appendix
+
+
+
+
