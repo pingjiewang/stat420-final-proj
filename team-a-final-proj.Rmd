@@ -80,40 +80,53 @@ Please use **autos_1** for determining box-cox tranformations,it only contains c
 
 ```{r}
 ####RICHA####
-#head(autos,100)
-nrow(autos_1) #3711 rows
 
-int_model = lm(price ~ powerPS * kilometer , data = autos_1)
-plot(price ~ powerPS * kilometer, data = autos_1, col = "grey", pch = 20, cex = 1.5, main = "")
-abline(int_model, col = "darkorange", lwd = 2)
+par(mfrow=c(1,2))
+model_add = lm(price ~ powerPS + kilometer , data = autos_1)
 #fitted vs residual
-plot(fitted(int_model), resid(int_model), col = "grey", pch = 20,
+plot(fitted(model_add), resid(model_add), col = "dodgerblue", pch = 20,
      xlab = "Fitted", ylab = "Residuals", main = "Fitted versus Residuals")
 abline(h = 0, col = "darkorange", lwd = 2)
 
 #qqplot
-qqnorm(resid(int_model), main = "Normal Q-Q Plot", col = "darkgrey")
-qqline(resid(int_model), col = "dodgerblue", lwd = 2)
+qqnorm(resid(model_add), main = "Normal Q-Q Plot", col = "dodgerblue")
+qqline(resid(model_add), col = "dodgerblue", lwd = 2)
 
 library(MASS)
-boxcox(int_model, plotit = TRUE, lambda = seq(-0.5, 2.0, by = 0.1))
+library(lmtest)
+par(mfrow=c(1,1))
+out=boxcox(model_add, plotit = TRUE, lambda = seq(-0.5, 2.0, by = 0.1))
+( lambda=out$x[which.max(out$y)] )
+
+model_add_cox=lm((price^lambda-1)/lambda ~ powerPS + kilometer , data = autos_1)
+
+par(mfrow=c(1,2))
+plot(fitted(model_add_cox), resid(model_add_cox), col = "dodgerblue", 
+     xlab = "Fitted", ylab = "Residuals", main = "Fitted versus Residuals")
+abline(h = 0, col = "darkorange", lwd = 2)
+qqnorm(resid(model_add_cox), main = "Normal Q-Q Plot", col = "dodgerblue")
+qqline(resid(model_add_cox), col = "dodgerblue", lwd = 2)
+
+shapiro.test(resid(model_add_cox))
+bptest(model_add_cox)
+
 
 #finding large leverage
-mod_lev = hatvalues(int_model)
-mod_lev_mean = mean(mod_lev)
-high_lev = mod_lev[mod_lev > 2 * mod_lev_mean]
-length(high_lev)
-head(high_lev)
+#mod_lev = hatvalues(int_model)
+#mod_lev_mean = mean(mod_lev)
+#high_lev = mod_lev[mod_lev > 2 * mod_lev_mean]
+#length(high_lev)
+#head(high_lev)
 
 #finding influenctial
-mod_cook = cooks.distance(int_model)
-high_infl = mod_cook[mod_cook > 4 / length(mod_cook)]
-head(high_infl)
-length(high_infl)
+#mod_cook = cooks.distance(int_model)
+#high_infl = mod_cook[mod_cook > 4 / length(mod_cook)]
+#head(high_infl)
+#length(high_infl)
 
 #Refit the multiple regression model without any influential points
-int_model_sub = lm(price ~ powerPS * kilometer , data = autos_1, subset = mod_cook <= 4 / length(mod_cook))
-(coef(int_model) - coef(int_model_sub)) / coef(int_model)
+#int_model_sub = lm(price ~ powerPS * kilometer , data = autos_1, subset = mod_cook <= 4 / length(mod_cook))
+#(coef(int_model) - coef(int_model_sub)) / coef(int_model)
 ```
 
 
