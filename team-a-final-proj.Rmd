@@ -78,8 +78,45 @@ pairs(autos_1,col="dodgerblue")
 
 Please use **autos_1** for determining box-cox tranformations,it only contains continuous variables 
 
+#### Check to see if any tranformation is needed 
+```{r fig.width=10}
+model=lm(price~powerPS+kilometer,data=autos_1)
+par(mfrow=c(1,2))
+plot(fitted(model),resid(model),col="dodgerblue")
+abline(h=0)
+qqnorm(resid(model),col="dodgerblue")
+qqline(resid(model),col="orange")
+
+shapiro.test(resid(model))
+
+library(lmtest)
+bptest(model)
+```
+
+```{r fig.width=10}
+model2_start=lm(price~powerPS*kilometer,data=autos_1)
+model2=step(model2_start,trace = 0)
+model2
+par(mfrow=c(1,2))
+plot(fitted(model2),resid(model2),col="dodgerblue")
+abline(h=0)
+qqnorm(resid(model2),col="dodgerblue")
+qqline(resid(model2),col="orange")
+
+shapiro.test(resid(model2))
+
+library(lmtest)
+bptest(model2)
+```
+
+
+#### It seems that there are violations of both the normality and equal variance assumptions. Therefore we will proceed to perform a Box-cot transformation
+
 ## 2.1.2 perform box-cox tranformation on continuous variables only (to estabish transformation form )
  Eg. model = lm(xxx(price)~powerPS+kilometer)
+
+
+
 
 
 #### check for colinearity
