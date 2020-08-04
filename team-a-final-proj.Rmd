@@ -37,18 +37,46 @@ str(autos_raw)
 
 ```{r}
 autos=subset(autos_raw, price>0)
-
-columns_remove=c("postalCode","lastSeen", "nrOfPictures","dateCreated","dateCrawled","monthOfRegistration",)   
+columns_remove=c("postalCode","lastSeen", "nrOfPictures","dateCreated","dateCrawled","monthOfRegistration")   
 columns_numeric = c("price","powerPS", "kilometer")
 columns_factor = c("seller","offerType","abtest","vehicleType","gearbox","model","brand","fuelType","notRepairedDamage" )
 other_columns = c("name","yearOfRegistration" ) 
 
-autos[,columns_factor]=lapply(autos[,columns_factor], as.factor)
+#autos[,columns_factor]=lapply(autos[,columns_factor], as.factor)
 autos = autos[, -which(names(autos) %in% columns_remove)]
 
 str(autos)
 
 ```
+
+## 2.1.2 Data exploration to find the relationship between continous variables
+
+```{r}
+library(dplyr)
+autos=na.omit(autos)
+autos_factor_groups=autos %>% count (seller,offerType,abtest,vehicleType,gearbox,model,brand,fuelType,notRepairedDamage)
+autos_factor_groups=autos_factor_groups[order(autos_factor_groups$n,decreasing = TRUE),]
+group1=autos_factor_groups[1,]
+group1.size = group1$n
+group1=subset(group1, select = -c(n) )
+
+autos_1=autos
+cols=names(group1)
+for (i in 1:ncol(group1)){
+  idx = autos_1[,cols[i]]==group1[[i]]
+  autos_1=autos_1[idx,]
+}
+
+autos_1=subset(autos_1, select = columns_numeric )
+  
+
+#
+pairs(autos_1,col="dodgerblue")
+```
+
+### Autos_1 has been isolated to better find a model format for continuous variables
+
+Please use **autos_1** for determining box-cox tranformations,it only contains continuous variables 
 
 ## 2.1.2 perform box-cox tranformation on continuous variables only (to estabish transformation form )
  Eg. model = lm(xxx(price)~powerPS+kilometer)
@@ -75,31 +103,10 @@ CV
 
 
 
-## 2.1.2 Data exploration to find the relationship between continous variables
-
-```{r}
-library(dplyr)
-autos=na.omit(autos)
-autos_factor_groups=autos %>% count (seller,offerType,abtest,vehicleType,gearbox,model,brand,fuelType,notRepairedDamage)
-autos_factor_groups=autos_factor_groups[order(autos_factor_groups$n,decreasing = TRUE),]
-#sort the nu
-
-#data1 = autos_factor_groups[, columns_numeric ]
-#pairs(data1,col="dodgerblue")
-```
 
 
-## split out a training set
 
-```{r, eval=FALSE}
-size_train=2000
-idx_train=sample(1:nrow(autos1),size_train)
-autos_train=autos[idx_train,]
-```
 
-## 2.1.2 
-
-### Examine only numeric columns first
 
 
 
