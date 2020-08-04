@@ -78,35 +78,42 @@ pairs(autos_1,col="dodgerblue")
 
 Please use **autos_1** for determining box-cox tranformations,it only contains continuous variables 
 
-#### Check to see if any tranformation is needed 
-```{r fig.width=10}
-model=lm(price~powerPS+kilometer,data=autos_1)
-par(mfrow=c(1,2))
-plot(fitted(model),resid(model),col="dodgerblue")
-abline(h=0)
-qqnorm(resid(model),col="dodgerblue")
-qqline(resid(model),col="orange")
+```{r}
+####RICHA####
+#head(autos,100)
+nrow(autos_1) #3711 rows
 
-shapiro.test(resid(model))
+int_model = lm(price ~ powerPS * kilometer , data = autos_1)
+plot(price ~ powerPS * kilometer, data = autos_1, col = "grey", pch = 20, cex = 1.5, main = "")
+abline(int_model, col = "darkorange", lwd = 2)
+#fitted vs residual
+plot(fitted(int_model), resid(int_model), col = "grey", pch = 20,
+     xlab = "Fitted", ylab = "Residuals", main = "Fitted versus Residuals")
+abline(h = 0, col = "darkorange", lwd = 2)
 
-library(lmtest)
-bptest(model)
-```
+#qqplot
+qqnorm(resid(int_model), main = "Normal Q-Q Plot", col = "darkgrey")
+qqline(resid(int_model), col = "dodgerblue", lwd = 2)
 
-```{r fig.width=10}
-model2_start=lm(price~powerPS*kilometer,data=autos_1)
-model2=step(model2_start,trace = 0)
-model2
-par(mfrow=c(1,2))
-plot(fitted(model2),resid(model2),col="dodgerblue")
-abline(h=0)
-qqnorm(resid(model2),col="dodgerblue")
-qqline(resid(model2),col="orange")
+library(MASS)
+boxcox(int_model, plotit = TRUE, lambda = seq(-0.5, 2.0, by = 0.1))
 
-shapiro.test(resid(model2))
+#finding large leverage
+mod_lev = hatvalues(int_model)
+mod_lev_mean = mean(mod_lev)
+high_lev = mod_lev[mod_lev > 2 * mod_lev_mean]
+length(high_lev)
+head(high_lev)
 
-library(lmtest)
-bptest(model2)
+#finding influenctial
+mod_cook = cooks.distance(int_model)
+high_infl = mod_cook[mod_cook > 4 / length(mod_cook)]
+head(high_infl)
+length(high_infl)
+
+#Refit the multiple regression model without any influential points
+int_model_sub = lm(price ~ powerPS * kilometer , data = autos_1, subset = mod_cook <= 4 / length(mod_cook))
+(coef(int_model) - coef(int_model_sub)) / coef(int_model)
 ```
 
 
