@@ -24,8 +24,13 @@ opts_chunk$set(cache = TRUE, autodep = TRUE)
 
 # 1. Introduction
 
-This is the introduction...
-todo: (Sandro)
+# Why this Topic?
+
+# The formation of our group hinged upon our interest in the automotive industry, as a result of that we have chosen this robust dataset because we wanted to have a better understanding about the used car market and this dataset had all of the components that we wanted to observe for this project.The dataset that I am using in this project was found on Kaggle, the well-known Machine Learning Competition website and it is about Used Car listings from eBay – Germany. 
+
+# The Data file contains approximately 370,000 observationsand 20 variables that are scraped from used-car listing on Ebay-Kleinanzeigen (German). The high quantity and authenticity make this dataset useful for an exploratory analysis. Furthermore, the dataset is very large but what we have done to narrow it down is that we have decided to filter the data based on the year registration variable starting the year 2000 to now so we can build a good model based on the last 20 years in the used auto industry in Germany. Some of the of the variables that are very useful tous where price is used as a response to help build model predication when combined with other variables but not limited to : Power, Kilometer, VehicleType, YearRegistration as part of our additive model for this project as you will find out that based on our research we were able to determine whichmodel is sufficient for us to use based on these continuous variables in the dataset.
+
+# This project focuses on the exploratory data analysis phase of the dataset. Inparticular, we will try to detect associations between variables, especially against price. The end-goal of such a project would be to build a price-prediction model for vehicles sold by eBay users. This project broke down a lot of the pure concepts that allowed us to bring together the concepts we learned as well as provide background information to understand how these models are determined.
 
 # 2. Methods
 
@@ -36,7 +41,7 @@ library(dplyr)
 library(readr)
 library(lmtest)
 ```
-
+# The major libraries needed will be loaded from here to be able to be used throughout the document. This will include the libraries such as LMTEST to test linear regression model, read input from a csv files readr, and dplyr which enables us to manipulate the dataset.
 
 ### Data loading
 Loading the raw data from the CSV file:  
@@ -59,7 +64,7 @@ columns_factor = c("abtest","vehicleType","gearbox","fuelType","notRepairedDamag
 autos=na.omit(autos)
 autos = autos[, -which(names(autos) %in% columns_remove)]
 ```
-
+### Our data clearning process involved removing unuseful variable such as postalCode, lastSeen, name ect.. and minize to some of the useful variable that we could use which includes the numerical and factor variables.
 
 After loading the raw data, **autos_raw** we: 
 
@@ -70,6 +75,7 @@ After loading the raw data, **autos_raw** we:
 - Indentify continous numeric columns : `r columns_numeric`
 - Indentify factor columns : `r columns_factor`
 
+### We have decided to narrow our data to include the last 20 years of used cars starting with the year 2000 which is more useful for us, and also keep the data where offertype = "Anagebot" and seller ="private" and alos removed any unwanted columns within our dataset.
 ```{r}
 #final data format
 str(autos)
@@ -116,8 +122,7 @@ model1_selected=model1_bic
 
 remove_high_influential_points_and_refit_model(model1_selected,autos_train)
 ```
-
-Clearly, this is not a good model. Fitted Residuals and Q-Q Plots indicated some sort variable tranformations are needed.
+## for the following method we pick a data sample_size of 2000 and with fit into an additive model with all of the variables to display the lenght of coef then we ran backward BIC to remove fsome of the predictors then we have a source where we place our functions to pull our model assumption to find out if our model is credible. Based on the results, we have concluded this is not a good model. Fitted Residuals and Q-Q Plots indicated some sort variable tranformations are needed.
 
 ## 2.2  Method 2 - With variable transformations
 
@@ -147,7 +152,7 @@ nrow(autos_factor_groups)
 #Number of groups with more than 300 records
 sum(autos_factor_groups$n>300)
 ```
-
+# Our data exploration continued though a process of breaking our dataset into subgroups by categorizing with the following variables: abtest, vehicleType, gearbox, model, fuelType and brand. For example abtest can only have either be test or control, and vehicleType can either be Limousine or Kleinwagon, we have picked a number of groups with more than 300 records in order to find a definitive model for our dataset. 
 
 #### 2.2.1.2 - work throght one subgroup first. (choose group 2)
 ```{r}
