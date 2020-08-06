@@ -43,7 +43,7 @@ library(lmtest)
 ```
 The major libraries needed will be loaded from here to be able to be used throughout the document. This will include the libraries such as LMTEST to test linear regression model, read input from a csv files readr, and dplyr which enables us to manipulate the dataset.
 
-### Data loading
+### 2.0.1 Data loading
 Loading the raw data from the CSV file:  
 ```{r,warning=FALSE,message=FALSE}
 autos_raw <- read_csv("autos.csv")
@@ -54,13 +54,13 @@ str(autos_raw)
 ```
 
 
-### Data cleaning and unused columns removal
+### 2.0.2 Data cleaning and unused columns removal
 
 ```{r}
 autos=subset(autos_raw, price>500 & price<200000 & yearOfRegistration>=2000 & powerPS>0 & offerType=="Angebot" & seller=="privat")
 columns_remove=c("postalCode","lastSeen","name","model","brand", "nrOfPictures","dateCreated","dateCrawled","monthOfRegistration","offerType","seller")   
-columns_numeric = c("price","powerPS","yearOfRegistration")
-columns_factor = c("abtest","vehicleType","gearbox","fuelType","notRepairedDamage","kilometer" )
+columns_numeric = c("price","powerPS","yearOfRegistration","kilometer")
+columns_factor = c("abtest","vehicleType","gearbox","fuelType","notRepairedDamage" )
 autos=na.omit(autos)
 autos = autos[, -which(names(autos) %in% columns_remove)]
 ```
@@ -95,14 +95,31 @@ todo: checking colinear with cor()...
 
 todo: describe observations.
 
-## 2.1 Method 1 - a straightforward but dump approach
+### 2.0.3 Setup training and testing data
 
 ```{r}
-#Setup data with 2000 randomly sampled and all columns
-training_size=100000
+#Setup data with 10000 randomly sampled and all columns
+training_size=50000
 set.seed(20200807)
 idx_train=sample(1:nrow(autos),training_size)
 autos_train= autos[idx_train,]
+autos_train[,columns_factor]=lapply(autos_train[,columns_factor], as.factor)
+str(autos_train)
+
+#test data
+test_size=training_size
+idx_remain = !(1:nrow(autos) %in% idx_train)
+autos_remain = autos[idx_remain, ]
+idx_test=sample(1:nrow(autos_remain),test_size)
+autos_test= autos_remain[idx_test,]
+autos_test[,columns_factor]=lapply(autos_test[,columns_factor], as.factor)
+rm(autos_remain)
+```
+
+## 2.1 Method 1 - a straightforward but dump approach
+
+```{r}
+
 model1_start=lm(price~.,data=autos_train)
 #size of staring model
 length( coef(model1_start) )
@@ -141,7 +158,7 @@ We will take a 2-phases approach to finding a good model:
 #listing out all factor columns
 columns_factor
 
-autos_factor_groups=autos %>% count (abtest,vehicleType,gearbox,fuelType,notRepairedDamage,kilometer)
+autos_factor_groups=autos %>% count (abtest,vehicleType,gearbox,fuelType,notRepairedDamage)
 autos_factor_groups=autos_factor_groups[order(autos_factor_groups$n,decreasing = TRUE),]
 
 #structure of autos_factor_groups
@@ -182,7 +199,7 @@ We will use the newly isolated dataset, **autos_1** to better help finding a mod
 
 ```{r}
 par(mfrow=c(1,2))
-model2_add = lm(price ~ powerPS +yearOfRegistration , data = autos_1)
+model2_add = lm(price ~ powerPS +yearOfRegistration+kilometer, data = autos_1)
 diagnostics(model2_add)
 ```
 
@@ -209,8 +226,14 @@ Plots looks better but it seems additional predictor transformation might help.
 
 ```{r}
 # starting with log and 2nd order terms for all predictors
-model2a_bic_start=lm( (price^lambda-1)/lambda ~ powerPS+yearOfRegistration+I(powerPS^2), data = autos_1 )
+model2a_bic_start=lm( (price^lambda-1)/lambda ~ powerPS+I(log(powerPS)) + I(powerPS^2)
+                        +yearOfRegistration + I(log(yearOfRegistration)) + I(yearOfRegistration^2) 
+                        +kilometer + I(log(kilometer)) + I(kilometer^2)
+                      , data = autos_1 )
   
+
+
+
 model2a_bic = step(model2a_bic_start,trace=0)
 diagnostics(model2a_bic)
 summary(model2a_bic)
@@ -220,11 +243,16 @@ model2a=model2a_bic
 formula_str=as.character(model2a$call[2])
 ```
 
-#### 2.2.1.6 - Run box-cox tranformation all for groups with > 300 records
+The formula form of model(using only continuous variables) is:
+
+- **`r formula_str`**
+
+
+#### 2.2.1.6 (to be removed)- Run box-cox tranformation all for groups with > 300 records
 
 We will run box-cox transformation on subgroup of data that has more than 300 records..
 
-```{r}
+```{r, eval=FALSE}
 source("misc_functions.R")
 boxcox_input_formula= as.formula ( as.character(model2_add$call[2]) )
 (boxcox_lambda=subset_autodata_with_boxcox(autos,boxcox_input_formula))
@@ -234,23 +262,42 @@ lambda
 ```
 Based on our analysis above, we will use $\lambda=`r lambda`$ for the Box-Cox transformation!
 
+
 ### 2.2.2 - Phase 2: adding categorical variables to the model that was determined in Phase 1
 
 The best model form with only continous variable is:  
 
 - `r formula_str`  
-- Where $\lambda=`r lambda`$
+- Where we determine the new $\lambda$ value based on entire training dataset
 
 Next, we will add all factor varibles to the formula format we obtained from the Phase 1 as the starting model in backward BIC search.
+
+#### 2.2.2.0 (new) - Run box-cox tranformation on all training data
+We will determine new $\lambda$ value by fitting established model form on all training data
+
+- **Formula format determined from Phase 1**: `r formula_str`
+  
+```{r}
+
+par(mfrow=c(1,1))
+
+model_2a_all= lm (price ~ powerPS + I(log(powerPS)) + I(powerPS^2) + I(log(yearOfRegistration)) + kilometer + I(log(kilometer)),data=autos_train)
+
+diagnostics(model_2a_all)
+
+out=boxcox(model_2a_all, plotit = TRUE, lambda = seq(-0.5, 1.0, by = 0.05))
+( lambda=out$x[which.max(out$y)] )
+
+
+```
+  
   
 #### 2.2.2.1 Searching for a good model using backward BIC   
 ```{r}
-training_size
-idx_train=sample(1:nrow(autos),training_size)
-autos_train=autos[idx_train,]
-autos_train[,columns_factor]=lapply(autos_train[,columns_factor], as.factor)
 
-model2_start = lm( ((price^lambda - 1)/lambda) ~ .-vehicleType +  I(powerPS^2), data=autos_train ) 
+#model2_start = lm( ((price^lambda - 1)/lambda) ~ .-vehicleType +  I(powerPS^2), data=autos_train ) 
+model2_start = lm( ((price^lambda - 1)/lambda) ~ .+I(log(powerPS)) + I(powerPS^2) + I(log(yearOfRegistration)) + I(log(kilometer)), data=autos_train ) 
+
 n=nrow(autos_train)
 model2_selected_bic = step(model2_start,k=log(n),trace=0)
 summary(model2_selected_bic)
@@ -258,6 +305,27 @@ summary(model2_selected_bic)
 diagnostics(model2_selected_bic)
 
 model2_selected=model2_selected_bic
+
+model2_selected_bic$call[2]
+```
+
+
+#### 2.2.2.1a verify regression signifcant with ANOVA test on high p-Value betas(vehicleType and fuelType)
+
+-vehicleType
+
+```{r}
+null_model_str = paste (as.character(model2_selected_bic$call[2]), "-vehicleType")
+model_null= lm(null_model_str, data = autos_train)
+anova(model_null,model2_selected_bic)
+```
+
+-fuelType
+
+```{r}
+null_model_str = paste (as.character(model2_selected_bic$call[2]), "-fuelType")
+model_null= lm(null_model_str, data = autos_train)
+anova(model_null,model2_selected_bic)
 ```
 
 
