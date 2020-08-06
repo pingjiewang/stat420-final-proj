@@ -1,0 +1,858 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\PassOptionsToPackage{usenames,dvipsnames}{color} % color is loaded by hyperref
+\hypersetup{unicode=true,
+            pdftitle={Building an Used Car Price Prediction Model for Germany eBay listings},
+            pdfauthor={Richa Gupta/Sandro Tanis/Ping Wang},
+            colorlinks=true,
+            linkcolor=Maroon,
+            citecolor=Blue,
+            urlcolor=cyan,
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{Building an Used Car Price Prediction Model for Germany eBay listings}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Richa Gupta/Sandro Tanis/Ping Wang}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{Aug 07, 2020}
+
+
+\begin{document}
+\maketitle
+
+\begin{center}\rule{0.5\linewidth}{\linethickness}\end{center}
+
+\hypertarget{introduction}{%
+\section{1. Introduction}\label{introduction}}
+
+\hypertarget{methods}{%
+\section{2. Methods}\label{methods}}
+
+\hypertarget{data-cleanning-and-exploration}{%
+\subsection{2.1 Data cleanning and
+exploration}\label{data-cleanning-and-exploration}}
+
+Loading for raw data
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(readr)}
+\NormalTok{autos_raw <-}\StringTok{ }\KeywordTok{read_csv}\NormalTok{(}\StringTok{"autos.csv"}\NormalTok{)}
+\KeywordTok{attr}\NormalTok{(autos_raw, }\StringTok{'spec'}\NormalTok{) <-}\StringTok{ }\OtherTok{NULL}
+\KeywordTok{attr}\NormalTok{(autos_raw, }\StringTok{'problems'}\NormalTok{) <-}\StringTok{ }\OtherTok{NULL}
+
+\KeywordTok{str}\NormalTok{(autos_raw)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Classes 'spec_tbl_df', 'tbl_df', 'tbl' and 'data.frame': 354687 obs. of  20 variables:
+##  $ dateCrawled        : POSIXct, format: "2016-03-24 11:52:17" "2016-03-24 10:58:45" ...
+##  $ name               : chr  "Golf_3_1.6" "A5_Sportback_2.7_Tdi" "Jeep_Grand_Cherokee_\"Overland\"" "GOLF_4_1_4__3T\xdcRER" ...
+##  $ seller             : chr  "privat" "privat" "privat" "privat" ...
+##  $ offerType          : chr  "Angebot" "Angebot" "Angebot" "Angebot" ...
+##  $ price              : num  480 18300 9800 1500 3600 650 2200 0 14500 999 ...
+##  $ abtest             : chr  "test" "test" "test" "test" ...
+##  $ vehicleType        : chr  NA "coupe" "suv" "kleinwagen" ...
+##  $ yearOfRegistration : num  1993 2011 2004 2001 2008 ...
+##  $ gearbox            : chr  "manuell" "manuell" "automatik" "manuell" ...
+##  $ powerPS            : num  0 190 163 75 69 102 109 50 125 101 ...
+##  $ model              : chr  "golf" NA "grand" "golf" ...
+##  $ kilometer          : num  150000 125000 125000 150000 90000 150000 150000 40000 30000 150000 ...
+##  $ monthOfRegistration: num  0 5 8 6 7 10 8 7 8 0 ...
+##  $ fuelType           : chr  "benzin" "diesel" "diesel" "benzin" ...
+##  $ brand              : chr  "volkswagen" "audi" "jeep" "volkswagen" ...
+##  $ notRepairedDamage  : chr  NA "ja" NA "nein" ...
+##  $ dateCreated        : POSIXct, format: "2016-03-24" "2016-03-24" ...
+##  $ nrOfPictures       : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ postalCode         : chr  "70435" "66954" "90480" "91074" ...
+##  $ lastSeen           : POSIXct, format: "2016-04-07 03:16:57" "2016-04-07 01:46:50" ...
+\end{verbatim}
+
+\hypertarget{data-cleaning-and-preparation}{%
+\subsection{2.1.1 Data cleaning and
+preparation}\label{data-cleaning-and-preparation}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{autos=}\KeywordTok{subset}\NormalTok{(autos_raw, price}\OperatorTok{>}\DecValTok{0} \OperatorTok{&}\StringTok{ }\NormalTok{yearOfRegistration}\OperatorTok{>=}\DecValTok{2000} \OperatorTok{&}\StringTok{ }\NormalTok{offerType}\OperatorTok{==}\StringTok{"Angebot"} \OperatorTok{&}\StringTok{ }\NormalTok{seller}\OperatorTok{==}\StringTok{"privat"}\NormalTok{)}
+\NormalTok{columns_remove=}\KeywordTok{c}\NormalTok{(}\StringTok{"postalCode"}\NormalTok{,}\StringTok{"lastSeen"}\NormalTok{, }\StringTok{"nrOfPictures"}\NormalTok{,}\StringTok{"dateCreated"}\NormalTok{,}\StringTok{"dateCrawled"}\NormalTok{,}\StringTok{"monthOfRegistration"}\NormalTok{,}\StringTok{"offerType"}\NormalTok{,}\StringTok{"seller"}\NormalTok{)   }
+\NormalTok{columns_numeric =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"price"}\NormalTok{,}\StringTok{"powerPS"}\NormalTok{, }\StringTok{"kilometer"}\NormalTok{,}\StringTok{"yearOfRegistration"}\NormalTok{)}
+\NormalTok{columns_factor =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"abtest"}\NormalTok{,}\StringTok{"vehicleType"}\NormalTok{,}\StringTok{"gearbox"}\NormalTok{,}\StringTok{"model"}\NormalTok{,}\StringTok{"brand"}\NormalTok{,}\StringTok{"fuelType"}\NormalTok{,}\StringTok{"notRepairedDamage"}\NormalTok{ )}
+\NormalTok{other_columns =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"name"}\NormalTok{) }
+
+\CommentTok{#autos[,columns_factor]=lapply(autos[,columns_factor], as.factor)}
+\NormalTok{autos =}\StringTok{ }\NormalTok{autos[, }\OperatorTok{-}\KeywordTok{which}\NormalTok{(}\KeywordTok{names}\NormalTok{(autos) }\OperatorTok{%in%}\StringTok{ }\NormalTok{columns_remove)]}
+\NormalTok{autos =}\StringTok{ }\NormalTok{autos[, }\OperatorTok{-}\KeywordTok{which}\NormalTok{(}\KeywordTok{names}\NormalTok{(autos) }\OperatorTok{%in%}\StringTok{ }\NormalTok{other_columns)]}
+\KeywordTok{str}\NormalTok{(autos)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Classes 'tbl_df', 'tbl' and 'data.frame':    250368 obs. of  11 variables:
+##  $ price             : num  18300 9800 1500 3600 2200 ...
+##  $ abtest            : chr  "test" "test" "test" "test" ...
+##  $ vehicleType       : chr  "coupe" "suv" "kleinwagen" "kleinwagen" ...
+##  $ yearOfRegistration: num  2011 2004 2001 2008 2004 ...
+##  $ gearbox           : chr  "manuell" "automatik" "manuell" "manuell" ...
+##  $ powerPS           : num  190 163 75 69 109 125 105 140 131 190 ...
+##  $ model             : chr  NA "grand" "golf" "fabia" ...
+##  $ kilometer         : num  125000 125000 150000 90000 150000 30000 150000 150000 150000 70000 ...
+##  $ fuelType          : chr  "diesel" "diesel" "benzin" "diesel" ...
+##  $ brand             : chr  "audi" "jeep" "volkswagen" "skoda" ...
+##  $ notRepairedDamage : chr  "ja" NA "nein" "nein" ...
+\end{verbatim}
+
+\hypertarget{data-exploration-to-find-the-relationship-between-continous-variables}{%
+\subsection{2.1.2 Data exploration to find the relationship between
+continous
+variables}\label{data-exploration-to-find-the-relationship-between-continous-variables}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(dplyr)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'dplyr'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{autos=}\KeywordTok{na.omit}\NormalTok{(autos)}
+\NormalTok{autos_factor_groups=autos }\OperatorTok{%>%}\StringTok{ }\KeywordTok{count}\NormalTok{ (abtest,vehicleType,gearbox,model,brand,fuelType,notRepairedDamage)}
+\NormalTok{autos_factor_groups=autos_factor_groups[}\KeywordTok{order}\NormalTok{(autos_factor_groups}\OperatorTok{$}\NormalTok{n,}\DataTypeTok{decreasing =} \OtherTok{TRUE}\NormalTok{),]}
+\NormalTok{group1=autos_factor_groups[}\DecValTok{2}\NormalTok{,]}
+\NormalTok{group1.size =}\StringTok{ }\NormalTok{group1}\OperatorTok{$}\NormalTok{n}
+\NormalTok{group1=}\KeywordTok{subset}\NormalTok{(group1, }\DataTypeTok{select =} \OperatorTok{-}\KeywordTok{c}\NormalTok{(n) )}
+
+\NormalTok{autos_}\DecValTok{1}\NormalTok{=autos}
+\NormalTok{cols=}\KeywordTok{names}\NormalTok{(group1)}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{ncol}\NormalTok{(group1))\{}
+\NormalTok{  idx =}\StringTok{ }\NormalTok{autos_}\DecValTok{1}\NormalTok{[,cols[i]]}\OperatorTok{==}\NormalTok{group1[[i]]}
+\NormalTok{  autos_}\DecValTok{1}\NormalTok{=autos_}\DecValTok{1}\NormalTok{[idx,]}
+\NormalTok{\}}
+
+\NormalTok{autos_}\DecValTok{1}\NormalTok{=}\KeywordTok{subset}\NormalTok{(autos_}\DecValTok{1}\NormalTok{, }\DataTypeTok{select =}\NormalTok{ columns_numeric )}
+  
+
+\CommentTok{#}
+\KeywordTok{pairs}\NormalTok{(autos_}\DecValTok{1}\NormalTok{,}\DataTypeTok{col=}\StringTok{"dodgerblue"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{team-a-final-proj_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+\hypertarget{autos_1-has-been-isolated-to-better-find-a-model-format-for-continuous-variables}{%
+\subsubsection{Autos\_1 has been isolated to better find a model format
+for continuous
+variables}\label{autos_1-has-been-isolated-to-better-find-a-model-format-for-continuous-variables}}
+
+Please use \textbf{autos\_1} for determining box-cox tranformations,it
+only contains continuous variables
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\NormalTok{model_add =}\StringTok{ }\KeywordTok{lm}\NormalTok{(price }\OperatorTok{~}\StringTok{ }\NormalTok{powerPS }\OperatorTok{+}\StringTok{ }\NormalTok{kilometer}\OperatorTok{+}\NormalTok{yearOfRegistration , }\DataTypeTok{data =}\NormalTok{ autos_}\DecValTok{1}\NormalTok{)}
+\CommentTok{#fitted vs residual}
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{fitted}\NormalTok{(model_add), }\KeywordTok{resid}\NormalTok{(model_add), }\DataTypeTok{col =} \StringTok{"dodgerblue"}\NormalTok{, }\DataTypeTok{pch =} \DecValTok{20}\NormalTok{,}
+     \DataTypeTok{xlab =} \StringTok{"Fitted"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"Residuals"}\NormalTok{, }\DataTypeTok{main =} \StringTok{"Fitted versus Residuals of additive"}\NormalTok{)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{h =} \DecValTok{0}\NormalTok{, }\DataTypeTok{col =} \StringTok{"darkorange"}\NormalTok{, }\DataTypeTok{lwd =} \DecValTok{2}\NormalTok{)}
+
+\CommentTok{#qqplot}
+\KeywordTok{qqnorm}\NormalTok{(}\KeywordTok{resid}\NormalTok{(model_add), }\DataTypeTok{main =} \StringTok{"Normal Q-Q Plot of additive"}\NormalTok{, }\DataTypeTok{col =} \StringTok{"dodgerblue"}\NormalTok{)}
+\KeywordTok{qqline}\NormalTok{(}\KeywordTok{resid}\NormalTok{(model_add), }\DataTypeTok{col =} \StringTok{"dodgerblue"}\NormalTok{, }\DataTypeTok{lwd =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{team-a-final-proj_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+\hypertarget{perform-box-cox-tranformation-on-continuous-variables-only-to-estabish-transformation-form}{%
+\subsection{2.1.3 perform box-cox tranformation on continuous variables
+only (to estabish transformation form
+)}\label{perform-box-cox-tranformation-on-continuous-variables-only-to-estabish-transformation-form}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(MASS)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'MASS'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:dplyr':
+## 
+##     select
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(lmtest)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Loading required package: zoo
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'zoo'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:base':
+## 
+##     as.Date, as.Date.numeric
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\NormalTok{out=}\KeywordTok{boxcox}\NormalTok{(model_add, }\DataTypeTok{plotit =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{lambda =} \KeywordTok{seq}\NormalTok{(}\OperatorTok{-}\FloatTok{0.5}\NormalTok{, }\FloatTok{2.0}\NormalTok{, }\DataTypeTok{by =} \FloatTok{0.1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{team-a-final-proj_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{( }\DataTypeTok{lambda=}\NormalTok{out}\OperatorTok{$}\NormalTok{x[}\KeywordTok{which.max}\NormalTok{(out}\OperatorTok{$}\NormalTok{y)] )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.3081
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model_cox_start=}\KeywordTok{lm}\NormalTok{( (price}\OperatorTok{^}\NormalTok{lambda}\DecValTok{-1}\NormalTok{)}\OperatorTok{/}\NormalTok{lambda }\OperatorTok{~}\StringTok{ }\NormalTok{powerPS }\OperatorTok{+}\StringTok{ }\NormalTok{kilometer}\OperatorTok{+}\NormalTok{yearOfRegistration}\OperatorTok{+}\KeywordTok{I}\NormalTok{(powerPS}\OperatorTok{^}\DecValTok{2}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{I}\NormalTok{(kilometer}\OperatorTok{^}\DecValTok{2}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{I}\NormalTok{(}\KeywordTok{log}\NormalTok{(kilometer)), }\DataTypeTok{data =}\NormalTok{ autos_}\DecValTok{1}\NormalTok{)}
+\NormalTok{model_cox =}\StringTok{ }\KeywordTok{step}\NormalTok{(model_cox_start,}\DataTypeTok{trace=}\DecValTok{0}\NormalTok{)}
+\CommentTok{#model_cox}
+\CommentTok{#model_cox2 = step(model_cox_start,k=log(nrow(autos_1)),trace=0)}
+\CommentTok{#model_cox2}
+
+\CommentTok{#model_add_cox=lm((price^lambda-1)/lambda ~ powerPS, data = autos_1)}
+
+\KeywordTok{summary}\NormalTok{(model_cox)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = (price^lambda - 1)/lambda ~ powerPS + yearOfRegistration + 
+##     I(powerPS^2) + I(kilometer^2) + I(log(kilometer)), data = autos_1)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -30.408  -1.712   0.036   1.653  16.253 
+## 
+## Coefficients:
+##                     Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)        -3.43e+03   5.32e+01  -64.52   <2e-16 ***
+## powerPS             7.42e-02   1.38e-03   53.65   <2e-16 ***
+## yearOfRegistration  1.73e+00   2.63e-02   65.68   <2e-16 ***
+## I(powerPS^2)       -5.79e-06   1.20e-07  -48.13   <2e-16 ***
+## I(kilometer^2)     -2.67e-10   1.80e-11  -14.83   <2e-16 ***
+## I(log(kilometer))   3.99e-01   2.25e-01    1.78    0.076 .  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 3.18 on 2023 degrees of freedom
+## Multiple R-squared:  0.918,  Adjusted R-squared:  0.918 
+## F-statistic: 4.52e+03 on 5 and 2023 DF,  p-value: <2e-16
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{fitted}\NormalTok{(model_cox), }\KeywordTok{resid}\NormalTok{(model_cox), }\DataTypeTok{col =} \StringTok{"dodgerblue"}\NormalTok{, }
+     \DataTypeTok{xlab =} \StringTok{"Fitted"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"Residuals"}\NormalTok{, }\DataTypeTok{main =} \StringTok{"Fitted versus Residuals with Box-cox"}\NormalTok{)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{h =} \DecValTok{0}\NormalTok{, }\DataTypeTok{col =} \StringTok{"darkorange"}\NormalTok{, }\DataTypeTok{lwd =} \DecValTok{2}\NormalTok{)}
+\KeywordTok{qqnorm}\NormalTok{(}\KeywordTok{resid}\NormalTok{(model_cox), }\DataTypeTok{main =} \StringTok{"Normal Q-Q Plot with Box-cox"}\NormalTok{, }\DataTypeTok{col =} \StringTok{"dodgerblue"}\NormalTok{)}
+\KeywordTok{qqline}\NormalTok{(}\KeywordTok{resid}\NormalTok{(model_cox), }\DataTypeTok{col =} \StringTok{"dodgerblue"}\NormalTok{, }\DataTypeTok{lwd =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{team-a-final-proj_files/figure-latex/unnamed-chunk-5-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{shapiro.test}\NormalTok{(}\KeywordTok{resid}\NormalTok{(model_cox))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  resid(model_cox)
+## W = 0.94, p-value <2e-16
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{bptest}\NormalTok{(model_cox)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  studentized Breusch-Pagan test
+## 
+## data:  model_cox
+## BP = 78, df = 5, p-value = 2e-15
+\end{verbatim}
+
+\hypertarget{tempory-block---refit-the-multiple-regression-model-without-any-influential-points}{%
+\subsubsection{tempory block - refit the multiple regression model
+without any influential
+points}\label{tempory-block---refit-the-multiple-regression-model-without-any-influential-points}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#finding influenctial}
+\NormalTok{mod_cook =}\StringTok{ }\KeywordTok{cooks.distance}\NormalTok{(model_cox)}
+\NormalTok{n=}\KeywordTok{length}\NormalTok{(}\KeywordTok{resid}\NormalTok{(model_cox))}
+\NormalTok{high_infl =}\StringTok{ }\NormalTok{mod_cook }\OperatorTok{>}\StringTok{ }\DecValTok{4} \OperatorTok{/}\StringTok{ }\NormalTok{n}
+\KeywordTok{sum}\NormalTok{(high_infl)     }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 96
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{mean}\NormalTok{(high_infl)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.04731
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Refit the multiple regression model without any influential points}
+\NormalTok{formula=}\KeywordTok{as.formula}\NormalTok{(}\KeywordTok{as.character}\NormalTok{(model_cox}\OperatorTok{$}\NormalTok{call[}\DecValTok{2}\NormalTok{]))}
+\NormalTok{model_cox_sub =}\StringTok{ }\KeywordTok{lm}\NormalTok{(formula, }\DataTypeTok{data =}\NormalTok{ autos_}\DecValTok{1}\NormalTok{, }\DataTypeTok{subset =} \OperatorTok{!}\NormalTok{high_infl)}
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{fitted}\NormalTok{(model_cox_sub), }\KeywordTok{resid}\NormalTok{(model_cox_sub), }\DataTypeTok{col =} \StringTok{"dodgerblue"}\NormalTok{, }
+     \DataTypeTok{xlab =} \StringTok{"Fitted"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"Residuals"}\NormalTok{, }\DataTypeTok{main =} \StringTok{"Fitted versus Residuals with Box-cox"}\NormalTok{)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{h =} \DecValTok{0}\NormalTok{, }\DataTypeTok{col =} \StringTok{"darkorange"}\NormalTok{, }\DataTypeTok{lwd =} \DecValTok{2}\NormalTok{)}
+\KeywordTok{qqnorm}\NormalTok{(}\KeywordTok{resid}\NormalTok{(model_cox_sub), }\DataTypeTok{main =} \StringTok{"Normal Q-Q Plot with Box-cox"}\NormalTok{, }\DataTypeTok{col =} \StringTok{"dodgerblue"}\NormalTok{)}
+\KeywordTok{qqline}\NormalTok{(}\KeywordTok{resid}\NormalTok{(model_cox_sub), }\DataTypeTok{col =} \StringTok{"dodgerblue"}\NormalTok{, }\DataTypeTok{lwd =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{team-a-final-proj_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(model_cox_sub)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = formula, data = autos_1, subset = !high_infl)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -8.774 -1.536  0.074  1.623  9.027 
+## 
+## Coefficients:
+##                     Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)        -3.39e+03   4.60e+01  -73.85   <2e-16 ***
+## powerPS             6.31e-02   4.25e-03   14.85   <2e-16 ***
+## yearOfRegistration  1.71e+00   2.26e-02   75.54   <2e-16 ***
+## I(powerPS^2)        3.47e-05   1.24e-05    2.79   0.0053 ** 
+## I(kilometer^2)     -2.57e-10   1.51e-11  -17.09   <2e-16 ***
+## I(log(kilometer))   1.92e-01   2.08e-01    0.92   0.3555    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 2.5 on 1927 degrees of freedom
+## Multiple R-squared:  0.945,  Adjusted R-squared:  0.945 
+## F-statistic: 6.6e+03 on 5 and 1927 DF,  p-value: <2e-16
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#(coef(int_model) - coef(int_model_sub)) / coef(int_model)}
+\KeywordTok{shapiro.test}\NormalTok{(}\KeywordTok{resid}\NormalTok{(model_cox_sub))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  resid(model_cox_sub)
+## W = 1, p-value = 0.0004
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{bptest}\NormalTok{(model_cox_sub)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  studentized Breusch-Pagan test
+## 
+## data:  model_cox_sub
+## BP = 133, df = 5, p-value <2e-16
+\end{verbatim}
+
+\hypertarget{determine-best-lambda-for-box-cox-tranformation}{%
+\subsection{2.1.4 determine best lambda for box-cox
+tranformation}\label{determine-best-lambda-for-box-cox-tranformation}}
+
+We will run box-cox transformation on subgroup of data that has more
+than 300 records..
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{source}\NormalTok{(}\StringTok{"misc_functions.R"}\NormalTok{)}
+\NormalTok{(}\DataTypeTok{boxcox_lambda=}\KeywordTok{subset_autodata_with_boxcox}\NormalTok{(autos))}
+\KeywordTok{hist}\NormalTok{(boxcox_lambda,}\DataTypeTok{breaks=}\DecValTok{20}\NormalTok{,}\DataTypeTok{col=}\StringTok{"lightblue"}\NormalTok{)}
+\KeywordTok{mean}\NormalTok{(boxcox_lambda)}
+\end{Highlighting}
+\end{Shaded}
+
+Based on our analysis above, we will use \(\lambda=0.3\) for the Box-Cox
+transformation!
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lambda=}\FloatTok{0.3}
+\NormalTok{formula_str=}\KeywordTok{as.character}\NormalTok{(model_cox}\OperatorTok{$}\NormalTok{call[}\DecValTok{2}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{phase-ii---adding-categorical-variable-to-the-model-form-determine-in-phase-i}{%
+\subsubsection{Phase II - adding categorical variable to the model form
+determine in Phase
+I}\label{phase-ii---adding-categorical-variable-to-the-model-form-determine-in-phase-i}}
+
+\hypertarget{the-best-model-form-with-only-continous-variable-is}{%
+\subparagraph{The best model form with only continous variable
+is:}\label{the-best-model-form-with-only-continous-variable-is}}
+
+(price\^{}lambda - 1)/lambda \textasciitilde{} powerPS +
+yearOfRegistration + I(powerPS\^{}2) + I(kilometer\^{}2) +
+I(log(kilometer))
+
+\hypertarget{next-we-combine-continous-variableswiht-established-form-with-all-factor-varible-to-start-a-backward-aic-to-find-a-good-model.}{%
+\paragraph{Next, we combine continous variables(wiht established form)
+with all factor varible to start a backward AIC to find a good
+model.}\label{next-we-combine-continous-variableswiht-established-form-with-all-factor-varible-to-start-a-backward-aic-to-find-a-good-model.}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{size_train=}\DecValTok{2000}
+
+\NormalTok{idx_train=}\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(autos),size_train)}
+\NormalTok{autos_train=autos[idx_train,]}
+\NormalTok{autos_train[,columns_factor]=}\KeywordTok{lapply}\NormalTok{(autos_train[,columns_factor], as.factor)}
+\CommentTok{#model2_start = lm( ((price^lambda - 1)/lambda) ~ .^2 +  I(powerPS^2) + I(kilometer^2) + I(log(kilometer)), autos_train ) }
+\NormalTok{model2_start =}\StringTok{ }\KeywordTok{lm}\NormalTok{( ((price}\OperatorTok{^}\NormalTok{lambda }\OperatorTok{-}\StringTok{ }\DecValTok{1}\NormalTok{)}\OperatorTok{/}\NormalTok{lambda) }\OperatorTok{~}\StringTok{ }\NormalTok{. }\OperatorTok{+}\StringTok{  }\KeywordTok{I}\NormalTok{(powerPS}\OperatorTok{^}\DecValTok{2}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{I}\NormalTok{(kilometer}\OperatorTok{^}\DecValTok{2}\NormalTok{) }\OperatorTok{+}\StringTok{ }\KeywordTok{I}\NormalTok{(}\KeywordTok{log}\NormalTok{(kilometer)), }\DataTypeTok{data=}\NormalTok{autos_train ) }
+\NormalTok{n=}\KeywordTok{nrow}\NormalTok{(autos_train)}
+\NormalTok{model2_selected_bic =}\StringTok{ }\KeywordTok{step}\NormalTok{(model2_start,}\DataTypeTok{k=}\KeywordTok{log}\NormalTok{(n),}\DataTypeTok{trace=}\DecValTok{0}\NormalTok{)}
+\NormalTok{model2_selected_bic}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = ((price^lambda - 1)/lambda) ~ vehicleType + yearOfRegistration + 
+##     gearbox + powerPS + kilometer + brand + notRepairedDamage + 
+##     I(powerPS^2) + I(kilometer^2) + I(log(kilometer)), data = autos_train)
+## 
+## Coefficients:
+##           (Intercept)         vehicleTypebus      vehicleTypecabrio  
+##             -3.64e+03               3.42e+00               6.39e+00  
+##      vehicleTypecoupe  vehicleTypekleinwagen       vehicleTypekombi  
+##              3.25e+00               1.72e-01               8.48e-01  
+##  vehicleTypelimousine         vehicleTypesuv     yearOfRegistration  
+##              1.53e+00               7.17e+00               1.85e+00  
+##        gearboxmanuell                powerPS              kilometer  
+##             -1.60e+00               7.55e-02               1.46e-04  
+##             brandaudi               brandbmw         brandchevrolet  
+##              6.71e+00               6.17e+00              -2.39e+00  
+##         brandchrysler           brandcitroen             branddacia  
+##              2.17e+00              -1.95e+00              -5.17e+00  
+##         branddaihatsu              brandfiat              brandford  
+##              2.75e+00              -1.10e+00              -6.12e-01  
+##            brandhonda           brandhyundai            brandjaguar  
+##              7.44e-01              -2.26e+00               5.01e+00  
+##             brandjeep               brandkia              brandlada  
+##              8.81e-01              -1.67e+00              -8.76e+00  
+##           brandlancia        brandland_rover             brandmazda  
+##             -3.15e+00               5.50e+00               1.82e+00  
+##    brandmercedes_benz              brandmini        brandmitsubishi  
+##              6.10e+00               5.23e+00               1.19e+00  
+##           brandnissan              brandopel           brandpeugeot  
+##              1.57e+00               5.52e-01              -1.49e+00  
+##          brandporsche           brandrenault             brandrover  
+##              1.79e+01              -8.65e-01               1.22e+00  
+##             brandsaab              brandseat             brandskoda  
+##             -2.66e+00               1.13e+00               2.62e+00  
+##            brandsmart            brandsubaru            brandsuzuki  
+##             -1.89e+00               4.57e+00               2.51e+00  
+##           brandtoyota        brandvolkswagen             brandvolvo  
+##              1.38e+00               4.73e+00               3.59e+00  
+## notRepairedDamagenein           I(powerPS^2)         I(kilometer^2)  
+##              4.99e+00              -4.31e-05              -6.67e-10  
+##     I(log(kilometer))  
+##             -4.01e+00
+\end{verbatim}
+
+\hypertarget{remove-high-influence-data-and-refit-the-choose-model}{%
+\subsection{2.1.4 remove high influence data and refit the choose
+model}\label{remove-high-influence-data-and-refit-the-choose-model}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model =model2_selected_bic}
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{fitted}\NormalTok{(model), }\KeywordTok{resid}\NormalTok{(model), }\DataTypeTok{col =} \StringTok{"dodgerblue"}\NormalTok{, }
+     \DataTypeTok{xlab =} \StringTok{"Fitted"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"Residuals"}\NormalTok{, }\DataTypeTok{main =} \StringTok{"Fitted versus Residuals"}\NormalTok{)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{h =} \DecValTok{0}\NormalTok{, }\DataTypeTok{col =} \StringTok{"darkorange"}\NormalTok{, }\DataTypeTok{lwd =} \DecValTok{2}\NormalTok{)}
+\KeywordTok{qqnorm}\NormalTok{(}\KeywordTok{resid}\NormalTok{(model), }\DataTypeTok{main =} \StringTok{"Normal Q-Q Plot"}\NormalTok{, }\DataTypeTok{col =} \StringTok{"dodgerblue"}\NormalTok{)}
+\KeywordTok{qqline}\NormalTok{(}\KeywordTok{resid}\NormalTok{(model), }\DataTypeTok{col =} \StringTok{"dodgerblue"}\NormalTok{, }\DataTypeTok{lwd =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{team-a-final-proj_files/figure-latex/unnamed-chunk-10-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{shapiro.test}\NormalTok{(}\KeywordTok{resid}\NormalTok{(model))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  resid(model)
+## W = 0.93, p-value <2e-16
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{bptest}\NormalTok{(model)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  studentized Breusch-Pagan test
+## 
+## data:  model
+## BP = 62, df = 51, p-value = 0.1
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#finding influenctial}
+\NormalTok{mod_cook =}\StringTok{ }\KeywordTok{cooks.distance}\NormalTok{(model)}
+\NormalTok{n=}\KeywordTok{length}\NormalTok{(}\KeywordTok{resid}\NormalTok{(model))}
+\NormalTok{high_infl =}\StringTok{ }\NormalTok{mod_cook }\OperatorTok{>}\StringTok{ }\DecValTok{4} \OperatorTok{/}\StringTok{ }\NormalTok{n}
+\KeywordTok{sum}\NormalTok{(high_infl)     }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] NA
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{mean}\NormalTok{(high_infl)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] NA
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Refit the multiple regression model without any influential points}
+\NormalTok{formula=}\KeywordTok{as.formula}\NormalTok{(}\KeywordTok{as.character}\NormalTok{(model}\OperatorTok{$}\NormalTok{call[}\DecValTok{2}\NormalTok{]))}
+\NormalTok{model_sub =}\StringTok{ }\KeywordTok{lm}\NormalTok{(formula, }\DataTypeTok{data =}\NormalTok{ autos_train, }\DataTypeTok{subset =} \OperatorTok{!}\NormalTok{high_infl)}
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(}\KeywordTok{fitted}\NormalTok{(model_sub), }\KeywordTok{resid}\NormalTok{(model_sub), }\DataTypeTok{col =} \StringTok{"dodgerblue"}\NormalTok{, }
+     \DataTypeTok{xlab =} \StringTok{"Fitted"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"Residuals"}\NormalTok{, }\DataTypeTok{main =} \StringTok{"Fitted versus Residuals"}\NormalTok{)}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{h =} \DecValTok{0}\NormalTok{, }\DataTypeTok{col =} \StringTok{"darkorange"}\NormalTok{, }\DataTypeTok{lwd =} \DecValTok{2}\NormalTok{)}
+\KeywordTok{qqnorm}\NormalTok{(}\KeywordTok{resid}\NormalTok{(model_sub), }\DataTypeTok{main =} \StringTok{"Normal Q-Q Plot"}\NormalTok{, }\DataTypeTok{col =} \StringTok{"dodgerblue"}\NormalTok{)}
+\KeywordTok{qqline}\NormalTok{(}\KeywordTok{resid}\NormalTok{(model_sub), }\DataTypeTok{col =} \StringTok{"dodgerblue"}\NormalTok{, }\DataTypeTok{lwd =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{team-a-final-proj_files/figure-latex/unnamed-chunk-10-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{shapiro.test}\NormalTok{(}\KeywordTok{resid}\NormalTok{(model_sub))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  resid(model_sub)
+## W = 1, p-value = 7e-06
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{bptest}\NormalTok{(model_sub)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  studentized Breusch-Pagan test
+## 
+## data:  model_sub
+## BP = 121, df = 48, p-value = 3e-08
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(model_sub)}\OperatorTok{$}\NormalTok{adj.r.squared}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.8996
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{coef}\NormalTok{(}\KeywordTok{summary}\NormalTok{(model_sub))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                         Estimate Std. Error  t value  Pr(>|t|)
+## (Intercept)           -3.631e+03  6.452e+01 -56.2808 0.000e+00
+## vehicleTypebus         2.817e+00  1.424e+00   1.9791 4.795e-02
+## vehicleTypecabrio      4.873e+00  1.457e+00   3.3434 8.442e-04
+## vehicleTypecoupe       2.249e+00  1.463e+00   1.5374 1.244e-01
+## vehicleTypekleinwagen -3.570e-01  1.410e+00  -0.2532 8.002e-01
+## vehicleTypekombi       2.637e-01  1.415e+00   0.1864 8.522e-01
+## vehicleTypelimousine   6.777e-01  1.412e+00   0.4798 6.314e-01
+## vehicleTypesuv         6.185e+00  1.477e+00   4.1871 2.958e-05
+## yearOfRegistration     1.843e+00  3.123e-02  59.0198 0.000e+00
+## gearboxmanuell        -1.451e+00  2.592e-01  -5.5990 2.480e-08
+## powerPS                7.100e-02  5.377e-03  13.2051 4.108e-38
+## kilometer              1.546e-04  4.690e-05   3.2959 9.998e-04
+## brandaudi              6.755e+00  1.178e+00   5.7322 1.155e-08
+## brandbmw               6.784e+00  1.168e+00   5.8074 7.453e-09
+## brandchevrolet        -3.286e+00  1.754e+00  -1.8740 6.108e-02
+## brandchrysler          1.195e+00  2.560e+00   0.4668 6.407e-01
+## brandcitroen          -1.845e+00  1.368e+00  -1.3483 1.777e-01
+## branddacia            -5.536e+00  1.885e+00  -2.9364 3.361e-03
+## branddaihatsu          1.982e+00  4.112e+00   0.4820 6.299e-01
+## brandfiat             -8.252e-01  1.268e+00  -0.6506 5.154e-01
+## brandford             -6.581e-01  1.187e+00  -0.5542 5.795e-01
+## brandhonda             8.843e-01  1.880e+00   0.4704 6.382e-01
+## brandhyundai          -2.268e+00  1.410e+00  -1.6082 1.080e-01
+## brandjaguar            3.477e+00  4.173e+00   0.8332 4.049e-01
+## brandjeep              2.303e+00  2.350e+00   0.9803 3.271e-01
+## brandkia              -2.044e+00  1.513e+00  -1.3509 1.769e-01
+## brandlada             -9.481e+00  3.055e+00  -3.1034 1.942e-03
+## brandland_rover        5.543e+00  2.586e+00   2.1433 3.222e-02
+## brandmazda             2.255e+00  1.379e+00   1.6350 1.022e-01
+## brandmercedes_benz     5.603e+00  1.179e+00   4.7505 2.186e-06
+## brandmini              5.572e+00  1.432e+00   3.8915 1.032e-04
+## brandmitsubishi        1.001e+00  1.693e+00   0.5913 5.544e-01
+## brandnissan            8.648e-01  1.407e+00   0.6147 5.388e-01
+## brandopel              7.021e-01  1.178e+00   0.5960 5.512e-01
+## brandpeugeot          -1.193e+00  1.232e+00  -0.9681 3.331e-01
+## brandporsche           1.646e+01  1.704e+00   9.6609 1.415e-21
+## brandrenault          -8.178e-01  1.230e+00  -0.6647 5.063e-01
+## brandsaab             -1.204e+00  3.015e+00  -0.3993 6.897e-01
+## brandseat              1.575e+00  1.277e+00   1.2337 2.175e-01
+## brandskoda             2.653e+00  1.265e+00   2.0980 3.604e-02
+## brandsmart            -1.399e+00  1.376e+00  -1.0166 3.095e-01
+## brandsuzuki            3.234e+00  1.810e+00   1.7868 7.413e-02
+## brandtoyota            1.069e+00  1.327e+00   0.8056 4.206e-01
+## brandvolkswagen        4.761e+00  1.159e+00   4.1079 4.167e-05
+## brandvolvo             3.953e+00  1.648e+00   2.3989 1.654e-02
+## notRepairedDamagenein  4.741e+00  3.431e-01  13.8182 2.098e-41
+## I(powerPS^2)          -1.685e-05  1.311e-05  -1.2850 1.990e-01
+## I(kilometer^2)        -7.109e-10  1.584e-10  -4.4887 7.608e-06
+## I(log(kilometer))     -4.112e+00  1.379e+00  -2.9815 2.906e-03
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{calc_loocv_rmse =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(model) \{}
+  \KeywordTok{sqrt}\NormalTok{(}\KeywordTok{mean}\NormalTok{((}\KeywordTok{resid}\NormalTok{(model) }\OperatorTok{/}\StringTok{ }\NormalTok{(}\DecValTok{1} \OperatorTok{-}\StringTok{ }\KeywordTok{hatvalues}\NormalTok{(model))) }\OperatorTok{^}\StringTok{ }\DecValTok{2}\NormalTok{))}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{test-results}{%
+\subsection{test results}\label{test-results}}
+
+TEST result?
+
+LOOC\_RMSE CV
+
+\hypertarget{results}{%
+\section{3. Results}\label{results}}
+
+\hypertarget{discussion}{%
+\section{4. Discussion}\label{discussion}}
+
+\hypertarget{appendix}{%
+\section{5. Appendix}\label{appendix}}
+
+
+\end{document}

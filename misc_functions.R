@@ -5,9 +5,9 @@ get_boxcox_lambda = function(model1){
   return(lambda)
 }
 
-subset_autodata_with_boxcox =function(data){
+subset_autodata_with_boxcox =function(data,input_formula){
   
-  autos_factor_groups=data %>% count (seller,offerType,abtest,vehicleType,gearbox,model,brand,fuelType,notRepairedDamage)
+  autos_factor_groups=data %>% count (abtest,vehicleType,gearbox,model,brand,fuelType,notRepairedDamage)
   autos_factor_groups=autos_factor_groups[order(autos_factor_groups$n,decreasing = TRUE),]
   autos_factor_groups=autos_factor_groups[autos_factor_groups$n>300,]
   nGroup=nrow(autos_factor_groups)
@@ -25,9 +25,64 @@ subset_autodata_with_boxcox =function(data){
       idx = autos_1[,cols[i]]==group1[[i]]
       autos_1=autos_1[idx,]
     }
-    model = lm(price ~ powerPS + kilometer , data = autos_1,y=TRUE, qr=TRUE)
+    model = lm(input_formula, data = autos_1,y=TRUE, qr=TRUE)
     lambda_bc[g] = get_boxcox_lambda(model)
   }
   return (lambda_bc)
+}
+
+# source("misc_functions.R")
+remove_high_influential_points_and_refit_model = function (model, data1){
+  ret = list()
+  #finding influenctial
+  cd = cooks.distance(model)
+  n=length(resid(model))
+  high_infl = cd > 4 / n
+  ret[["removed.n"]]=sum(high_infl) 
+  ret[["removed.fraction"]]=mean(high_infl)
+  #Refit the multiple regression model without any influential points
+  formula=as.formula(as.character(model$call[2]))
+  model_new = lm(formula, data = data1, subset = !high_infl)
+  ret[["new.model"]]=model_new
+  par(mfrow=c(1,2))
+  plot(fitted(model_new), resid(model_new), col = "dodgerblue", 
+       xlab = "Fitted", ylab = "Residuals", main = "Fitted versus Residuals with Box-cox")
+  abline(h = 0, col = "darkorange", lwd = 2)
+  qqnorm(resid(model_new), main = "Normal Q-Q Plot with Box-cox", col = "dodgerblue")
+  qqline(resid(model_new), col = "dodgerblue", lwd = 2)
+  return(ret)
+}
+
+
+diagnostics = function(model, pcol="dodgerblue",lcol="orange",alpha=0.05,plotit=TRUE,testit=TRUE){
+  
+  if (plotit ){
+    #fitted vs. residual
+    par(mfrow=c(1,2))
+    plot( model$fitted.values,
+          model$residuals, 
+          col=pcol,
+          xlab="Fitted",
+          ylab="Residuals",
+          main="Fitted versus residuals" )
+    abline(h=0,col=lcol,lwd=1)
+    
+    #QQ plot
+    qqnorm(resid(model),main="Normal Q-Q Plot",col=pcol)
+    qqline(resid(model),col=lcol,lwd=1)
+  
+  }
+  
+  if (testit){
+    ret = list()
+    shapiro.p.value = shapiro.test(resid(model))$p.value
+    ret[["shapiro.p.value"]]=shapiro.p.value
+    ret[["shapiro.decision"]]=ifelse (alpha>shapiro.p.value, "Reject", "Fail to Reject")
+    bp.p.value = unname(bptest(model)$p.value)
+    ret[["bp.p.value"]]=bp.p.value
+    ret[["bp.decision"]]=ifelse (alpha>bp.p.value, "Reject", "Fail to Reject")
+    return (ret)
+  }  
+  
 }
 

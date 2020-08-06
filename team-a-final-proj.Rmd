@@ -1,13 +1,15 @@
 ---
-title: 'Building a price prediction model for eBay Germany Used Car listings'
+title: "Building an Used Car Price Prediction Model for Germany eBay listings"
 author: "Richa Gupta/Sandro Tanis/Ping Wang"
-course: "STAT 420, Summer 2020"
-date: 'Aug 07, 2020'
+date: "Aug 07, 2020"
 output:
-  html_document: 
+  html_document:
     theme: readable
-    toc: yes  
+    toc: yes
+  word_document:
+    toc: yes
   pdf_document: default
+course: STAT 420, Summer 2020
 urlcolor: cyan
 ---
 
@@ -19,15 +21,26 @@ library(knitr)
 opts_chunk$set(cache = TRUE, autodep = TRUE)
 ```
 
+
 # 1. Introduction
+
+This is the introduction...
+todo: (Sandro)
 
 # 2. Methods
 
-## 2.1 Data cleanning and exploration
+## 2.0 Data preparation
 
-Loading for raw data
 ```{r,warning=FALSE,message=FALSE}
+library(dplyr)
 library(readr)
+library(lmtest)
+```
+
+
+### Data loading
+Loading the raw data from the CSV file:  
+```{r,warning=FALSE,message=FALSE}
 autos_raw <- read_csv("autos.csv")
 attr(autos_raw, 'spec') <- NULL
 attr(autos_raw, 'problems') <- NULL
@@ -36,245 +49,234 @@ str(autos_raw)
 ```
 
 
-## 2.1.1 Data cleaning and preparation
+### Data cleaning and unused columns removal
 
 ```{r}
 autos=subset(autos_raw, price>0 & yearOfRegistration>=2000 & offerType=="Angebot" & seller=="privat")
-columns_remove=c("postalCode","lastSeen", "nrOfPictures","dateCreated","dateCrawled","monthOfRegistration","offerType","seller")   
+columns_remove=c("postalCode","lastSeen","name", "nrOfPictures","dateCreated","dateCrawled","monthOfRegistration","offerType","seller")   
 columns_numeric = c("price","powerPS", "kilometer","yearOfRegistration")
 columns_factor = c("abtest","vehicleType","gearbox","model","brand","fuelType","notRepairedDamage" )
-other_columns = c("name") 
-
-#autos[,columns_factor]=lapply(autos[,columns_factor], as.factor)
+autos=na.omit(autos)
 autos = autos[, -which(names(autos) %in% columns_remove)]
-autos = autos[, -which(names(autos) %in% other_columns)]
-str(autos)
-
-
 ```
 
 
+After loading the raw data, **autos_raw** we: 
 
-
-## 2.1.2 Data exploration to find the relationship between continous variables
+- Removed data with $price < 0$ 
+- Keep only data with offerType="Angebot" and seller=="privat". **todo: why?**
+- Keep only data with YearOfRegistration>=2000,  **todo: why?**
+- Removed unused columns: `r columns_remove`,  **todo: why?**
+- Indentify continous numeric columns : `r columns_numeric`
+- Indentify factor columns : `r columns_factor`
 
 ```{r}
-library(dplyr)
-autos=na.omit(autos)
+#final data format
+str(autos)
+```
+
+Taking a look at the continous varialbes only - checking for colinearity
+
+```{r}
+#Checking colinear on numberic columns on 2000 records sample
+sample_size=2000
+idx_sample=sample(1:nrow(autos),sample_size)
+autos_sample= subset (autos[idx_sample,], select = columns_numeric) 
+pairs(autos_sample,col="dodgerblue")
+```
+
+todo: checking colinear with cor()...
+
+todo: describe observations.
+
+## 2.1 Method 1 - a straightforward but dump approach
+
+```{r}
+#Setup data with 2000 randomly sampled and all columns
+sample_size=2000
+idx_sample=sample(1:nrow(autos),sample_size)
+autos_train= autos[idx_sample,]
+model1_start=lm(price~.,data=autos_train)
+#size of staring model
+length( coef(model1_start) )
+
+#Run BIC backward search
+n=nrow(autos_train)
+model1_bic = step(model1_start,k=log(n),trace = 0)
+#size of selected model by backward BIC
+length( coef(model1_bic) )
+model1_bic
+
+#checking model assumption
+source("misc_functions.R")
+diagnostics(model1_bic)
+
+model1_selected=model1_bic
+
+```
+
+Clearly, this is not a good model. Fitted Residuals and Q-Q Plots indicated some sort variable tranformations are needed.
+
+## 2.2  Method 2 - With variable transformations
+
+We will take a 2-phases approach to finding a good model:
+
+- Phase I - the Continuous variables phase 
+- Pahse II - Adding categorical variables the 
+
+
+### 2.2.1 - Phase 1: working with continous variable to determine the best model form for continous columns
+
+#### 2.2.1.1 - break data-set into subgroups by fixing factor variable values
+
+```{r}
+#listing out all factor columns
+columns_factor
+
 autos_factor_groups=autos %>% count (abtest,vehicleType,gearbox,model,brand,fuelType,notRepairedDamage)
 autos_factor_groups=autos_factor_groups[order(autos_factor_groups$n,decreasing = TRUE),]
-group1=autos_factor_groups[2,]
-group1.size = group1$n
+
+#structure of autos_factor_groups
+head(autos_factor_groups)
+
+#Total number of groups
+nrow(autos_factor_groups)
+
+#Number of groups with more than 300 records
+sum(autos_factor_groups$n>300)
+```
+
+
+#### 2.2.1.2 - work throght one subgroup first. (choose group 2)
+```{r}
+#choose group
+selected_group_idx=2
+group1=autos_factor_groups[selected_group_idx, ]
+(group1.size = group1$n)
 group1=subset(group1, select = -c(n) )
 
+#get the records for the selected group
 autos_1=autos
 cols=names(group1)
 for (i in 1:ncol(group1)){
   idx = autos_1[,cols[i]]==group1[[i]]
   autos_1=autos_1[idx,]
 }
-
 autos_1=subset(autos_1, select = columns_numeric )
-  
 
-#
-pairs(autos_1,col="dodgerblue")
 ```
 
-### Autos_1 has been isolated to better find a model format for continuous variables
+todo: pairs(autos_1,col="dodgerblue"), and explain the reason we isolated the group
 
-Please use **autos_1** for determining box-cox tranformations,it only contains continuous variables 
+We will use the newly isolated dataset, **autos_1** to better help finding a model form for continuous variables
+
+#### 2.2.1.3 - Try an additive model using all continous variables
 
 ```{r}
 par(mfrow=c(1,2))
-model_add = lm(price ~ powerPS + kilometer+yearOfRegistration , data = autos_1)
-#fitted vs residual
-plot(fitted(model_add), resid(model_add), col = "dodgerblue", pch = 20,
-     xlab = "Fitted", ylab = "Residuals", main = "Fitted versus Residuals of additive")
-abline(h = 0, col = "darkorange", lwd = 2)
-
-#qqplot
-qqnorm(resid(model_add), main = "Normal Q-Q Plot of additive", col = "dodgerblue")
-qqline(resid(model_add), col = "dodgerblue", lwd = 2)
-
+model2_add = lm(price ~ powerPS + kilometer+yearOfRegistration , data = autos_1)
+diagnostics(model2_add)
 ```
 
-## 2.1.3 perform box-cox tranformation on continuous variables only (to estabish transformation form )
-```{r}
+The plots and test pValue indicates signifant voiloation of equal variance and normality assumption. We will try Box-Cox transformation on Price next.
 
+
+#### 2.2.1.4 - Try Box-Cox tranformation on the selected group
+
+
+```{r}
 library(MASS)
 library(lmtest)
 par(mfrow=c(1,1))
-out=boxcox(model_add, plotit = TRUE, lambda = seq(-0.5, 2.0, by = 0.1))
+boxcox_input_formula= as.formula ( as.character(model2_add$call[2]) )
+out=boxcox(model2_add, plotit = TRUE, lambda = seq(-0.5, 1.0, by = 0.05))
 ( lambda=out$x[which.max(out$y)] )
-
-model_cox_start=lm( (price^lambda-1)/lambda ~ powerPS + kilometer+yearOfRegistration+I(powerPS^2) + I(kilometer^2) + I(log(kilometer)), data = autos_1)
-model_cox = step(model_cox_start,trace=0)
-#model_cox
-#model_cox2 = step(model_cox_start,k=log(nrow(autos_1)),trace=0)
-#model_cox2
-
-#model_add_cox=lm((price^lambda-1)/lambda ~ powerPS, data = autos_1)
-
-summary(model_cox)
-
-par(mfrow=c(1,2))
-plot(fitted(model_cox), resid(model_cox), col = "dodgerblue", 
-     xlab = "Fitted", ylab = "Residuals", main = "Fitted versus Residuals with Box-cox")
-abline(h = 0, col = "darkorange", lwd = 2)
-qqnorm(resid(model_cox), main = "Normal Q-Q Plot with Box-cox", col = "dodgerblue")
-qqline(resid(model_cox), col = "dodgerblue", lwd = 2)
-
-shapiro.test(resid(model_cox))
-bptest(model_cox)
-
-
+model2_add_cox = lm( ((price^lambda-1)/lambda) ~ powerPS + kilometer+yearOfRegistration , data = autos_1 )
+diagnostics(model2_add_cox)
 ```
 
-### tempory block - refit the multiple regression model without any influential points
+Plots looks better but it seems additional predictor transformation might help.
+
+#### 2.2.1.5 - finding predictor tranformation via backward BIC search
 
 ```{r}
-#finding influenctial
-mod_cook = cooks.distance(model_cox)
-n=length(resid(model_cox))
-high_infl = mod_cook > 4 / n
-sum(high_infl)     
-mean(high_infl)
+# starting with log and 2nd order terms for all predictors
+model2a_bic_start=lm( (price^lambda-1)/lambda ~ powerPS+yearOfRegistration+I(powerPS^2) + I(kilometer^2), data = autos_1 )
+  
+model2a_bic = step(model2a_bic_start,trace=0)
+diagnostics(model2a_bic)
+summary(model2a_bic)
 
-
-#Refit the multiple regression model without any influential points
-formula=as.formula(as.character(model_cox$call[2]))
-model_cox_sub = lm(formula, data = autos_1, subset = !high_infl)
-par(mfrow=c(1,2))
-plot(fitted(model_cox_sub), resid(model_cox_sub), col = "dodgerblue", 
-     xlab = "Fitted", ylab = "Residuals", main = "Fitted versus Residuals with Box-cox")
-abline(h = 0, col = "darkorange", lwd = 2)
-qqnorm(resid(model_cox_sub), main = "Normal Q-Q Plot with Box-cox", col = "dodgerblue")
-qqline(resid(model_cox_sub), col = "dodgerblue", lwd = 2)
-
-summary(model_cox_sub)
-
-#(coef(int_model) - coef(int_model_sub)) / coef(int_model)
-shapiro.test(resid(model_cox_sub))
-bptest(model_cox_sub)
-
+#Save model2a for later steps
+model2a=model2a_bic
+formula_str=as.character(model2a$call[2])
 ```
 
-## 2.1.4 determine best lambda for box-cox tranformation 
+#### 2.2.1.6 - Run box-cox tranformation all for groups with > 300 records
 
 We will run box-cox transformation on subgroup of data that has more than 300 records..
 
-```{r, eval=FALSE}
-source("misc_functions.R")
-(boxcox_lambda=subset_autodata_with_boxcox(autos))
-hist(boxcox_lambda,breaks=20,col="lightblue")
-mean(boxcox_lambda)
-```
-Based on our analysis above, we will use $\lambda=0.3$ for the Box-Cox transformation!
-
 ```{r}
-lambda=0.3
-formula_str=as.character(model_cox$call[2])
+source("misc_functions.R")
+boxcox_input_formula= as.formula ( as.character(model2_add$call[2]) )
+(boxcox_lambda=subset_autodata_with_boxcox(autos,boxcox_input_formula))
+hist(boxcox_lambda,breaks=20,col="lightblue")
+lambda=mean(boxcox_lambda)
+lambda
 ```
+Based on our analysis above, we will use $\lambda=`r lambda`$ for the Box-Cox transformation!
 
+### 2.2.2 - Phase 2: adding categorical variables to the model that was determined in Phase 1
 
-### Phase II - adding categorical variable to the model form determine in Phase I
+The best model form with only continous variable is:  
 
-##### The best model form with only continous variable is:
-`r formula_str`
+- `r formula_str`  
+- Where $\lambda=`r lambda`$
 
-#### Next, we combine continous variables(wiht established form) with all factor varible to start a backward AIC to find a good model.
+Next, we will add all factor varibles to the formula format we obtained from the Phase 1 as the starting model in backward BIC search.
   
+#### 2.2.2.1 Searching for a good model using backward BIC   
 ```{r}
 size_train=2000
-
 idx_train=sample(1:nrow(autos),size_train)
 autos_train=autos[idx_train,]
 autos_train[,columns_factor]=lapply(autos_train[,columns_factor], as.factor)
-#model2_start = lm( ((price^lambda - 1)/lambda) ~ .^2 +  I(powerPS^2) + I(kilometer^2) + I(log(kilometer)), autos_train ) 
-model2_start = lm( ((price^lambda - 1)/lambda) ~ . +  I(powerPS^2) + I(kilometer^2) + I(log(kilometer)), data=autos_train ) 
+
+model2_start = lm( ((price^lambda - 1)/lambda) ~ .-brand-vehicleType +  I(powerPS^2) + I(kilometer^2) + I(log(kilometer)), data=autos_train ) 
 n=nrow(autos_train)
 model2_selected_bic = step(model2_start,k=log(n),trace=0)
-model2_selected_bic
+summary(model2_selected_bic)
+
+diagnostics(model2_selected_bic)
 ```
 
-##  2.1.4 remove high influence data and refit the choose model
+
+####  2.2.2.2 Remove high influence data and refit the Phase 2 model
 
 ```{r}
-model =model2_selected_bic
-par(mfrow=c(1,2))
-plot(fitted(model), resid(model), col = "dodgerblue", 
-     xlab = "Fitted", ylab = "Residuals", main = "Fitted versus Residuals")
-abline(h = 0, col = "darkorange", lwd = 2)
-qqnorm(resid(model), main = "Normal Q-Q Plot", col = "dodgerblue")
-qqline(resid(model), col = "dodgerblue", lwd = 2)
-
-shapiro.test(resid(model))
-bptest(model)
-
-
-#finding influenctial
-mod_cook = cooks.distance(model)
-n=length(resid(model))
-high_infl = mod_cook > 4 / n
-sum(high_infl)     
-mean(high_infl)
-
-#Refit the multiple regression model without any influential points
-formula=as.formula(as.character(model$call[2]))
-model_sub = lm(formula, data = autos_train, subset = !high_infl)
-par(mfrow=c(1,2))
-plot(fitted(model_sub), resid(model_sub), col = "dodgerblue", 
-     xlab = "Fitted", ylab = "Residuals", main = "Fitted versus Residuals")
-abline(h = 0, col = "darkorange", lwd = 2)
-qqnorm(resid(model_sub), main = "Normal Q-Q Plot", col = "dodgerblue")
-qqline(resid(model_sub), col = "dodgerblue", lwd = 2)
-
-shapiro.test(resid(model_sub))
-bptest(model_sub)
-
-summary(model_sub)$adj.r.squared
-coef(summary(model_sub))
+fix_model=remove_high_influential_points_and_refit_model(model2_selected_bic, autos_train)
+model2_selected=fix_model$new.model
+fix_model
+summary(model2_selected)
+```
 
 calc_loocv_rmse = function(model) {
   sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
 }
 
-
-```
-
-
-## test results
-
-```{r}
-
-
-```
-
-
-
-
-
-
-TEST result?
-
-LOOC_RMSE
-CV 
-
-
-
-
-
-
-
-
-
-
-
-
-
+## 2.3  Method 3 - find an interaction model based on method 2 (optional)
+We will do this if we have time
 
 # 3. Results
+```{r}
+#we have two models to compare results
+
+summary(model1_selected)
+summary(model2_selected)
+
+
+```
+
 
 # 4. Discussion
 
