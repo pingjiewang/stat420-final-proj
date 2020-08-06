@@ -52,10 +52,10 @@ str(autos_raw)
 ### Data cleaning and unused columns removal
 
 ```{r}
-autos=subset(autos_raw, price>0 & yearOfRegistration>=2000 & offerType=="Angebot" & seller=="privat")
-columns_remove=c("postalCode","lastSeen","name", "nrOfPictures","dateCreated","dateCrawled","monthOfRegistration","offerType","seller")   
-columns_numeric = c("price","powerPS", "kilometer","yearOfRegistration")
-columns_factor = c("abtest","vehicleType","gearbox","model","brand","fuelType","notRepairedDamage" )
+autos=subset(autos_raw, price>500 & price<200000 & yearOfRegistration>=2000 & powerPS>0 & offerType=="Angebot" & seller=="privat")
+columns_remove=c("postalCode","lastSeen","name","model","brand", "nrOfPictures","dateCreated","dateCrawled","monthOfRegistration","offerType","seller")   
+columns_numeric = c("price","powerPS","yearOfRegistration")
+columns_factor = c("abtest","vehicleType","gearbox","fuelType","notRepairedDamage","kilometer" )
 autos=na.omit(autos)
 autos = autos[, -which(names(autos) %in% columns_remove)]
 ```
@@ -93,9 +93,10 @@ todo: describe observations.
 
 ```{r}
 #Setup data with 2000 randomly sampled and all columns
-sample_size=2000
-idx_sample=sample(1:nrow(autos),sample_size)
-autos_train= autos[idx_sample,]
+training_size=100000
+set.seed(20200807)
+idx_train=sample(1:nrow(autos),training_size)
+autos_train= autos[idx_train,]
 model1_start=lm(price~.,data=autos_train)
 #size of staring model
 length( coef(model1_start) )
@@ -113,6 +114,7 @@ diagnostics(model1_bic)
 
 model1_selected=model1_bic
 
+remove_high_influential_points_and_refit_model(model1_selected,autos_train)
 ```
 
 Clearly, this is not a good model. Fitted Residuals and Q-Q Plots indicated some sort variable tranformations are needed.
@@ -133,7 +135,7 @@ We will take a 2-phases approach to finding a good model:
 #listing out all factor columns
 columns_factor
 
-autos_factor_groups=autos %>% count (abtest,vehicleType,gearbox,model,brand,fuelType,notRepairedDamage)
+autos_factor_groups=autos %>% count (abtest,vehicleType,gearbox,fuelType,notRepairedDamage,kilometer)
 autos_factor_groups=autos_factor_groups[order(autos_factor_groups$n,decreasing = TRUE),]
 
 #structure of autos_factor_groups
@@ -174,7 +176,7 @@ We will use the newly isolated dataset, **autos_1** to better help finding a mod
 
 ```{r}
 par(mfrow=c(1,2))
-model2_add = lm(price ~ powerPS + kilometer+yearOfRegistration , data = autos_1)
+model2_add = lm(price ~ powerPS +yearOfRegistration , data = autos_1)
 diagnostics(model2_add)
 ```
 
@@ -191,7 +193,7 @@ par(mfrow=c(1,1))
 boxcox_input_formula= as.formula ( as.character(model2_add$call[2]) )
 out=boxcox(model2_add, plotit = TRUE, lambda = seq(-0.5, 1.0, by = 0.05))
 ( lambda=out$x[which.max(out$y)] )
-model2_add_cox = lm( ((price^lambda-1)/lambda) ~ powerPS + kilometer+yearOfRegistration , data = autos_1 )
+model2_add_cox = lm( ((price^lambda-1)/lambda) ~ powerPS +yearOfRegistration , data = autos_1 )
 diagnostics(model2_add_cox)
 ```
 
@@ -201,7 +203,7 @@ Plots looks better but it seems additional predictor transformation might help.
 
 ```{r}
 # starting with log and 2nd order terms for all predictors
-model2a_bic_start=lm( (price^lambda-1)/lambda ~ powerPS+yearOfRegistration+I(powerPS^2) + I(kilometer^2), data = autos_1 )
+model2a_bic_start=lm( (price^lambda-1)/lambda ~ powerPS+yearOfRegistration+I(powerPS^2), data = autos_1 )
   
 model2a_bic = step(model2a_bic_start,trace=0)
 diagnostics(model2a_bic)
@@ -237,17 +239,19 @@ Next, we will add all factor varibles to the formula format we obtained from the
   
 #### 2.2.2.1 Searching for a good model using backward BIC   
 ```{r}
-size_train=2000
-idx_train=sample(1:nrow(autos),size_train)
+training_size
+idx_train=sample(1:nrow(autos),training_size)
 autos_train=autos[idx_train,]
 autos_train[,columns_factor]=lapply(autos_train[,columns_factor], as.factor)
 
-model2_start = lm( ((price^lambda - 1)/lambda) ~ .-brand-vehicleType +  I(powerPS^2) + I(kilometer^2) + I(log(kilometer)), data=autos_train ) 
+model2_start = lm( ((price^lambda - 1)/lambda) ~ .-vehicleType +  I(powerPS^2), data=autos_train ) 
 n=nrow(autos_train)
 model2_selected_bic = step(model2_start,k=log(n),trace=0)
 summary(model2_selected_bic)
 
 diagnostics(model2_selected_bic)
+
+model2_selected=model2_selected_bic
 ```
 
 
@@ -255,9 +259,8 @@ diagnostics(model2_selected_bic)
 
 ```{r}
 fix_model=remove_high_influential_points_and_refit_model(model2_selected_bic, autos_train)
-model2_selected=fix_model$new.model
 fix_model
-summary(model2_selected)
+
 ```
 
 calc_loocv_rmse = function(model) {
@@ -267,13 +270,31 @@ calc_loocv_rmse = function(model) {
 ## 2.3  Method 3 - find an interaction model based on method 2 (optional)
 We will do this if we have time
 
+```{r,eval=TRUE}
+model3_add = lm(price ~ ., data = autos_train)
+diagnostics(model3_add)
+par(mfrow=c(1,1))
+boxcox_input_formula= as.formula ( as.character(model3_add$call[2]) )
+out=boxcox(model3_add, plotit = TRUE, lambda = seq(-0.5, 1.0, by = 0.05))
+( lambda=out$x[which.max(out$y)] )
+model3_start = lm( ((price^lambda-1)/lambda) ~ .^2 , data = autos_train )
+n=nrow(autos_train)
+model3=step(model3_start,k=log(n))
+diagnostics(model3)
+summary(model3)
+
+```
+
+
+
 # 3. Results
 ```{r}
 #we have two models to compare results
 
 summary(model1_selected)
 summary(model2_selected)
-
+par(mfrow=c(1,2))
+plot(model2_selected)
 
 ```
 
