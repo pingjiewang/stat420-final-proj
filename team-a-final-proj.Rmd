@@ -150,7 +150,7 @@ nrow(autos_factor_groups)
 #Number of groups with more than 300 records
 sum(autos_factor_groups$n>300)
 ```
-
+# Our data exploration continued though a process of breaking our dataset into subgroups by categorizing with the following variables: abtest, vehicleType, gearbox, model, fuelType and brand. For example abtest can only have either be test or control, and vehicleType can either be Limousine or Kleinwagon, we have picked a number of groups with more than 300 records in order to find a definitive model for our dataset. 
 
 #### 2.2.1.2 - work throght one subgroup first. (choose group 2)
 ```{r}
