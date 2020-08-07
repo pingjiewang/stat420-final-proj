@@ -361,36 +361,30 @@ summary(model3)
 
 # 3. Results
 ```{r}
-#we have two models to compare results
-
-summary(model1_selected)
-summary(model2_selected)
-par(mfrow=c(1,2))
-plot(model2_selected)
-
 # function to evaluate rmse
 rmse  = function(actual, predicted) {
   sqrt(mean((actual - predicted) ^ 2))
 }
 
+#mod1 RMSEs
+Train_RMSE_mod1 = rmse(autos_train$price, predict(model1_selected, autos_train, type = 'response'))
+Test_RMSE_mod1 =  rmse(autos_test$price, predict(model1_selected, autos_test,type = 'response'))
+
+#mod2 RMSEs
+Train_RMSE_mod2 = rmse(autos_train$price, (predict(model2_selected, newdata = autos_train, type ='response')*lambda+1)^(1/lambda))
+Test_RMSE_mod2 = rmse(autos_test$price, (predict(model2_selected, newdata = autos_test, type ='response')*lambda+1)^(1/lambda))
+
 # calculate all train errors
-train_error = c(
-  rmse(autos_train$price, predict(model1_selected, autos_train, type = 'response')),
-  rmse(autos_train$price, predict(model2_selected, autos_train, type = 'response'))
-)
+train_error = c(Train_RMSE_mod1, Train_RMSE_mod2)
 
 # calculate all test errors
-test_error = c(
-  rmse(autos_test$price, predict(model1_selected, autos_test,type = 'response')),
-  rmse(autos_test$price, predict(model2_selected, autos_test,type = 'response'))
-)
+test_error = c(Test_RMSE_mod1, Test_RMSE_mod2)
 
 auto_models = c("`Additive model`", "`Transformation model`")
 auto_results = data.frame(auto_models, train_error, test_error)
 colnames(auto_results) = c("Model", "Train RMSE", "Test RMSE")
 knitr::kable(auto_results)
 ```
-
 
 # 4. Discussion
 
