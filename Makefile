@@ -10,7 +10,7 @@ cmd:
 	@echo 'conda activate stat420'
 
 zip: 
-	zip team-a-final-proj.zip team-a-final-proj.* 
+	zip team-a-final-proj.zip team-a-final-proj.* autos_test.csv autos_train.csv misc_functions.R
 
 clean:
 	-rm team-a-final-proj.zip

@@ -19,6 +19,7 @@ urlcolor: cyan
 options(scipen = 1, digits = 4, width = 80)
 library(knitr)
 opts_chunk$set(cache = TRUE, autodep = TRUE)
+knitr::opts_chunk$set(fig.width=10) 
 ```
 
 
@@ -36,14 +37,17 @@ This project focuses on the exploratory data analysis phase of the dataset. In p
 
 ## 2.0 Data preparation
 
+### 2.0.1 Loading necessary Libaries and the script file
 ```{r,warning=FALSE,message=FALSE}
 library(dplyr)
 library(readr)
 library(lmtest)
+library(MASS)
+source("misc_functions.R")
 ```
 The major libraries needed will be loaded from here to be able to be used throughout the document. This will include the libraries such as LMTEST to test linear regression model, read input from a csv files readr, and dplyr which enables us to manipulate the dataset.
 
-### 2.0.1 Data loading
+### 2.0.2 Data loading
 Loading the raw data from the CSV file:  
 ```{r,warning=FALSE,message=FALSE}
 autos_raw <- read_csv("autos.csv")
@@ -54,7 +58,7 @@ str(autos_raw)
 ```
 
 
-### 2.0.2 Data cleaning and unused columns removal
+### 2.0.3 Data cleaning and unused columns removal
 
 ```{r}
 autos=subset(autos_raw, price>500 & price<200000 & yearOfRegistration>=2000 & powerPS>0 & offerType=="Angebot" & seller=="privat")
@@ -79,6 +83,8 @@ After loading the raw data, **autos_raw** we:
 str(autos)
 ```
 
+
+### 2.0.4 Checking colinearity on numberic variable
 Taking a look at the continous variables only - checking for colinearity
 
 ```{r}
@@ -93,7 +99,7 @@ round(cor(autos_sample), 2)
 ```
 Based on our observation, we have determined there little to no collineararity issues wiht our model
 
-### 2.0.3 Setup training and testing data
+### 2.0.5 Setup training and testing data
 
 ```{r}
 #Setup data with 10000 randomly sampled and all columns
@@ -116,25 +122,36 @@ rm(autos_remain)
 
 ## 2.1 Method 1 - a straightforward but dump approach
 
+
+## 2.1.1 Start with an additive model using all predictors
 ```{r}
 
 model1_start=lm(price~.,data=autos_train)
 #size of staring model
 length( coef(model1_start) )
 
+```
+
+## 2.1.2 Run BIC backward search
+```{r}
 #Run BIC backward search
 n=nrow(autos_train)
 model1_bic = step(model1_start,k=log(n),trace = 0)
 #size of selected model by backward BIC
 length( coef(model1_bic) )
 model1_bic
+```
 
-#checking model assumption
-source("misc_functions.R")
+## 2.1.3 Check for violation of model assumptions
+```{r}
 diagnostics(model1_bic)
-
 model1_selected=model1_bic
+```
 
+
+## 2.1.4 See if the assumption violations are improved when inflential points are removed
+
+```{r}
 remove_high_influential_points_and_refit_model(model1_selected,autos_train)
 ```
 
@@ -208,8 +225,6 @@ The plots and test pValue indicates signifant voiloation of equal variance and n
 
 
 ```{r}
-library(MASS)
-library(lmtest)
 par(mfrow=c(1,1))
 boxcox_input_formula= as.formula ( as.character(model2_add$call[2]) )
 out=boxcox(model2_add, plotit = TRUE, lambda = seq(-0.5, 1.0, by = 0.05))
@@ -246,21 +261,6 @@ The formula form of model(using only continuous variables) is:
 - **`r formula_str`**
 
 
-#### 2.2.1.6 (to be removed)- Run box-cox tranformation all for groups with > 300 records
-
-We will run box-cox transformation on subgroup of data that has more than 300 records..
-
-```{r, eval=FALSE}
-source("misc_functions.R")
-boxcox_input_formula= as.formula ( as.character(model2_add$call[2]) )
-(boxcox_lambda=subset_autodata_with_boxcox(autos,boxcox_input_formula))
-hist(boxcox_lambda,breaks=20,col="lightblue")
-lambda=mean(boxcox_lambda)
-lambda
-```
-Based on our analysis above, we will use $\lambda=`r lambda`$ for the Box-Cox transformation!
-
-
 ### 2.2.2 - Phase 2: adding categorical variables to the model that was determined in Phase 1
 
 The best model form with only continous variable is:  
@@ -270,7 +270,7 @@ The best model form with only continous variable is:
 
 Next, we will add all factor varibles to the formula format we obtained from the Phase 1 as the starting model in backward BIC search.
 
-#### 2.2.2.0 (new) - Run box-cox tranformation on all training data
+#### 2.2.2.0 - Run box-cox tranformation on all training data
 We will determine new $\lambda$ value by fitting established model form on all training data
 
 - **Formula format determined from Phase 1**: `r formula_str`
@@ -283,6 +283,7 @@ model_2a_all= lm (price ~ powerPS + I(log(powerPS)) + I(powerPS^2) + I(log(yearO
 
 diagnostics(model_2a_all)
 
+par(mfrow=c(1,1))
 out=boxcox(model_2a_all, plotit = TRUE, lambda = seq(-0.5, 1.0, by = 0.05))
 ( lambda=out$x[which.max(out$y)] )
 
@@ -292,7 +293,7 @@ out=boxcox(model_2a_all, plotit = TRUE, lambda = seq(-0.5, 1.0, by = 0.05))
   
 #### 2.2.2.1 Searching for a good model using backward BIC   
 ```{r}
-
+par(mfrow=c(1,1))
 #model2_start = lm( ((price^lambda - 1)/lambda) ~ .-vehicleType +  I(powerPS^2), data=autos_train ) 
 model2_start = lm( ((price^lambda - 1)/lambda) ~ .+I(log(powerPS)) + I(powerPS^2) + I(log(yearOfRegistration)) + I(log(kilometer)), data=autos_train ) 
 
@@ -308,7 +309,7 @@ model2_selected_bic$call[2]
 ```
 
 
-#### 2.2.2.1a verify regression signifcant with ANOVA test on high p-Value betas(vehicleType and fuelType)
+#### 2.2.2.2 verify regression signifcant with ANOVA test on high p-Value betas(vehicleType and fuelType)
 
 -vehicleType
 
@@ -327,7 +328,7 @@ anova(model_null,model2_selected_bic)
 ```
 
 
-####  2.2.2.2 Remove high influence data and refit the Phase 2 model
+####  2.2.2.3 Remove high influence data and refit the Phase 2 model
 
 ```{r}
 fix_model=remove_high_influential_points_and_refit_model(model2_selected_bic, autos_train)
@@ -335,28 +336,23 @@ fix_model
 
 ```
 
-calc_loocv_rmse = function(model) {
-  sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
-}
-
 ## 2.3  Method 3 - find an interaction model based on method 2 (optional)
 We will do this if we have time
 
 ```{r,eval=FALSE}
-model3_add = lm(price ~ ., data = autos_train)
-diagnostics(model3_add)
-par(mfrow=c(1,1))
-boxcox_input_formula= as.formula ( as.character(model3_add$call[2]) )
-out=boxcox(model3_add, plotit = TRUE, lambda = seq(-0.5, 1.0, by = 0.05))
-( lambda=out$x[which.max(out$y)] )
-model3_start = lm( ((price^lambda-1)/lambda) ~ .^2 , data = autos_train )
-n=nrow(autos_train)
-model3=step(model3_start,k=log(n))
-diagnostics(model3)
-summary(model3)
+library(tictoc)
+lambda
+model3a_bic_start=lm( (price^lambda-1)/lambda ~ .^2
+                      + I(log(powerPS)) + I(powerPS^2)
+                      + I(log(yearOfRegistration)) + I(yearOfRegistration^2) 
+                      + I(log(kilometer)) + I(kilometer^2)
+                      , data = autos_1 )
+
+model3a_bic = step(model2a_bic_start,trace=0)
+diagnostics(model3a_bic)
+summary(model3a_bic)
 
 ```
-
 
 
 # 3. Results
@@ -389,6 +385,12 @@ knitr::kable(auto_results)
 # 4. Discussion
 
 # 5. Appendix
+
+#### The listing for R code used
+
+```{r engine='bash', comment=''}
+cat -n misc_functions.R
+```
 
 
 

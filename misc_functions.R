@@ -7,8 +7,7 @@ get_boxcox_lambda = function(model1){
 
 subset_autodata_with_boxcox =function(data,input_formula){
   
-  #autos_factor_groups=data %>% count (abtest,vehicleType,gearbox,model,brand,fuelType,notRepairedDamage)
-  autos_factor_groups=data %>% count (abtest,vehicleType,gearbox,fuelType,notRepairedDamage)
+  autos_factor_groups=data %>%count(abtest,vehicleType,gearbox,fuelType,notRepairedDamage)
   autos_factor_groups=autos_factor_groups[order(autos_factor_groups$n,decreasing = TRUE),]
   autos_factor_groups=autos_factor_groups[autos_factor_groups$n>300,]
   nGroup=nrow(autos_factor_groups)
@@ -55,7 +54,7 @@ remove_high_influential_points_and_refit_model = function (model, data1){
 }
 
 
-diagnostics = function(model, pcol="dodgerblue",lcol="orange",alpha=0.05,plotit=TRUE,testit=TRUE){
+diagnostics = function(model, pcol="dodgerblue",lcol="orange",alpha=0.05,plotit=TRUE){
   
   if (plotit ){
     #fitted vs. residual
@@ -73,17 +72,6 @@ diagnostics = function(model, pcol="dodgerblue",lcol="orange",alpha=0.05,plotit=
     qqline(resid(model),col=lcol,lwd=1)
   
   }
-  
-  if (testit){
-    ret = list()
-    #shapiro.p.value = shapiro.test(resid(model))$p.value
-    #ret[["shapiro.p.value"]]=shapiro.p.value
-    #ret[["shapiro.decision"]]=ifelse (alpha>shapiro.p.value, "Reject", "Fail to Reject")
-    bp.p.value = unname(bptest(model)$p.value)
-    ret[["bp.p.value"]]=bp.p.value
-    ret[["bp.decision"]]=ifelse (alpha>bp.p.value, "Reject", "Fail to Reject")
-    return (ret)
-  }  
-  
+
 }
 
