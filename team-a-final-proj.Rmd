@@ -101,7 +101,8 @@ pairs(autos_sample,col="dodgerblue")
 ```{r}
 round(cor(autos_sample), 2)
 ```
-Based on our observation, we have determined there little to no collineararity issues with our model
+
+Based on the above Pair plot and the outpu of cor() function, we have determined there no significant collinearity issues. Therefore, we can proceed to include all continuous variables (except for Price) as model predictors.
 
 ### 2.0.5 Setup training and testing data
 
@@ -165,9 +166,9 @@ Based on the plot results, we concluded this is not a good model as the Fitted R
 remove_high_influential_points_and_refit_model(model1_selected,autos_train)
 ```
 
-Removing the high influential points (about 3% of observation) does improve the model a little. But it is still not ideal. We will save the model (model1_selected) as the first candidate model. In the result section, we will compare its performance with other candidate models. 
+Removing the high influential points (about 3% of observations) does improve the model a little. But it is still not ideal. We will save the model (model1_selected) as the first candidate model. In the result section, we will compare its performance with other candidate models. 
 
-Because there seems to be a violation of the linearity assumption, we will introduce response and predictor transformation in the next method.
+Because there seems to be a violation of the linearity assumption here, we will introduce response and predictor transformation in the next method.
 
 ## 2.2  Method 2 - With variable transformations
 
@@ -181,7 +182,7 @@ In this second approach to finding a good price prediction model, we will introd
 
 #### 2.2.1.1 - Break data-set into subgroups by fixing factor variable values
 
-To reduce the price variability due to different combinations of factor variable values, we will temporarily isolate a dataset for the analysis phase. Later, we will use the full training dataset in Phase 2 steps. To do this, we will use 'dplyr' package count() to group dataset by all factor variables. 
+To reduce the price variability due to different combinations of factor variable values, we will temporarily isolate a dataset for the analysis here in phase 1. Later, we will use the full training dataset in Phase 2 steps. To do this, we will use 'dplyr' package count() to group dataset by all factor variables. 
 
 ```{r}
 #listing out all factor columns
@@ -200,7 +201,7 @@ nrow(autos_factor_groups)
 sum(autos_factor_groups$n>300)
 ```
 
-Next, we will break our dataset into groups, we choose group #2 to isolate a dataset by filtering from the main dataset.
+Next, we will break our dataset into groups, we will choose group #2 to isolate a dataset by filtering from the main dataset.
 
 #### 2.2.1.2 - isolate a subset data (autos_1) for Phase 1 
 ```{r}
