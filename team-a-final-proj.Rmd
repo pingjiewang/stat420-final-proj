@@ -356,19 +356,21 @@ summary(model3a_bic)
 
 
 # 3. Results
-```{r}
-# function to evaluate rmse
-rmse  = function(actual, predicted) {
-  sqrt(mean((actual - predicted) ^ 2))
-}
 
+*Method 1* resulted in *additive model* which has price as the response with predictors as vehicleType, yearOfRegistration, gearbox, powerPS, kilometer, fuelType and notRepairedDamage.
+    
+*Method 2* resulted in *interaction model* where response variable price was transformed using boxcox transformation. Predictors used in the model include vehicleType, gearbox, powerPS, kilometer, fuelType, notRepairedDamage and yearOfRegistration. Predictors powerPS, yearOfRegistration and kilometer are log transformed.
+
+We use train and test RMSEs to evaluate the chosen 2 models:
+
+```{r}
 #mod1 RMSEs
-Train_RMSE_mod1 = rmse(autos_train$price, predict(model1_selected, autos_train, type = 'response'))
-Test_RMSE_mod1 =  rmse(autos_test$price, predict(model1_selected, autos_test,type = 'response'))
+Train_RMSE_mod1 = calcrmse(autos_train$price, predict(model1_selected, autos_train, type = 'response'))
+Test_RMSE_mod1 =  calcrmse(autos_test$price, predict(model1_selected, autos_test,type = 'response'))
 
 #mod2 RMSEs
-Train_RMSE_mod2 = rmse(autos_train$price, (predict(model2_selected, newdata = autos_train, type ='response')*lambda+1)^(1/lambda))
-Test_RMSE_mod2 = rmse(autos_test$price, (predict(model2_selected, newdata = autos_test, type ='response')*lambda+1)^(1/lambda))
+Train_RMSE_mod2 = calcrmse(autos_train$price, (predict(model2_selected, newdata = autos_train, type ='response')*lambda+1)^(1/lambda))
+Test_RMSE_mod2 = calcrmse(autos_test$price, (predict(model2_selected, newdata = autos_test, type ='response')*lambda+1)^(1/lambda))
 
 # calculate all train errors
 train_error = c(Train_RMSE_mod1, Train_RMSE_mod2)
@@ -376,17 +378,18 @@ train_error = c(Train_RMSE_mod1, Train_RMSE_mod2)
 # calculate all test errors
 test_error = c(Test_RMSE_mod1, Test_RMSE_mod2)
 
-auto_models = c("`Additive model`", "`Transformation model`")
+auto_models = c("Additive model", "Transformation model")
 auto_results = data.frame(auto_models, train_error, test_error)
 colnames(auto_results) = c("Model", "Train RMSE", "Test RMSE")
 knitr::kable(auto_results)
 ```
+As seen from the above table, the transformation model has a lower test and train RMSEs, suggesting it to be a better model.
 
 # 4. Discussion
 
 # 5. Appendix
 
-#### The listing for R code used
+Below file lists all the functions being used in the methods section:
 
 ```{r engine='bash', comment=''}
 cat -n misc_functions.R
