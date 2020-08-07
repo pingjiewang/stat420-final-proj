@@ -1,0 +1,70 @@
+---
+title: "Project Proposal (A-Team)"
+author: "Ping Wang/Sandro Tanis/Richa Gupta"
+date: "7/20/2020"
+output: html_document
+---
+
+## Final Project Proposal:
+
+1. The names of the students who will be contributing to the group project (A-Team):
+  *	**Ping Wang** (NetID - pingjw2)
+  *	**Sandro Tanis** (NetID – sandrot2)
+  *	**Richa Gupta** (NetID - richag2)
+
+2. A tentative title for the project: **Used Car listings from eBay - Germany**
+
+3. Description of the data file (what they contain including number of variables and number of records). You do not necessarily have to list all the variables, but at least mention those of greatest importance.
+* Data file contains approximately **370,000 observations** and **20 variables** that are scraped from used-car listing on Ebay-Kleinanzeigen (German). The high quantity and authenticity makes this dataset useful for an exploratory analysis.
+* Below is the list of various variables associated with the dataset, that we are planning to use:
+  * **name**: Name of the car
+  *	**seller**: Whether the seller is private or a dealer
+  *	**offerType**: The type of listing
+  * **price**: The price on the ad to sell the car.
+  * **vehicleType**: The vehicle Type.
+  * **yearOfRegistration**: The year in which year the car was first registered.
+  * **gearbox**: The transmission type.
+  * **powerPS**: The power of the car in PS.
+  * **model**: The car model name.
+  * **kilometer**: How many kilometers the car has driven.
+  * **monthOfRegistration**: The month in which year the car was first registered.
+  * **fuelType**: What type of fuel the car uses.
+  * **brand**: The brand of the car.
+  * **notRepairedDamage**: If the car has a damage which is not yet repaired.
+  * **postalCode**: The postal code for the location of the vehicle.
+
+4. Background information on the data sets, including specific citation of their source.
+* The Dataset is from Ebay-Kleinanzeigen in Germany where customers can buy used cars based on various categories and criteria, directly from the website.
+* Data can be accessed using: 
+<https://www.kaggle.com/orgesleka/used-cars-database/home>
+
+5. A brief statement of the business, science, research, or personal interest you have in the data set which you hope to explore.
+* We hope to build a MLR model for used car price prediction. 
+* We will use price as the response variable. 
+* The predictors will be selected from the two remaining continuous numeric variables (PowerPS and kilometer) and the 11 categorical variables. 
+* To reduce the data processing time during model selection, we will use a randomly sampled 2000 observations for fitting the linear model. 
+* We will use the leftover observations for validating model performance. * We will examine the assumptions of the linear model by preforming regression diagnosis testing. 
+* We will consider collinearity when selecting model variables. We will use dummy variables for categorical fields. 
+* We might use additional methods such as outlier diagnostics, polynomial regression, and transformations when needed.
+
+6. Evidence that the data can be loaded into R. Load the data, and print the first few values of the response variable as evidence.
+
+```{r message=FALSE, warning=FALSE}
+library(readr)
+autos = read_csv("autos.csv")
+```
+
+Variables in autos dataset:
+```{r}
+colnames(autos)
+```
+
+We intend to use price as the response variable:
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+autos %>% select(price)
+```
+
+
+
+
