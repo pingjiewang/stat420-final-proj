@@ -31,7 +31,7 @@ The formation of our group hinged upon our interest in the automotive industry, 
 
 The dataset we are using for this project was found on Kaggle, the well-known Machine Learning Competition website and it is about Used Car listings from eBay – Germany please see link here: https://www.kaggle.com/orgesleka/used-cars-database/home. Data file contains approximately 370,000 observations and 20 variables that are scraped from used-car listing on Ebay-Kleinanzeigen (German). The high quantity and authenticity make this dataset useful for an exploratory analysis. Furthermore, the dataset is very large but what we have done to narrow it down is that we have decided to filter the data based on the year registration variable starting the year 2000 to now so we can build a good model based on the last 20 years in the used auto industry in Germany. Furthermore, we randomly sampled 100,000 records after our data cleaning process, and split half the data in our training dataset and test dataset which resulted in 50,000 records each for our model prediction. Some of the of the variables that are very useful to us where price is used as a response to help build model predication when combined it with other variables but not limited to: Power, Kilometer, VehicleType, YearRegistration as part of our additive and transformation model for this project. 
 
-This project focuses on finding a good model for predicting based on the statistical knowledge that we gained from the class. We will try to determine relationship between different variables, between the chosen predictor variable and price. Furthermore, our goal is  to build a MLR model for used car price prediction where we use price as the response variable, the predictors will be selected from all remaining continuous numerical variables (PowerPs and Kilometer, yearRegistrations) and the other  categorical variables so we can make compare 3 different methods so we can arrive to the best model that will fit our prediction. We will also be using the leftover observation to validate our model performance trough examining our assumptions by using regression diagnostic testing. Other method that we will be using are collinearity to check for issues on model and dummy variables for categorical fields. Finally, additional methods such as: outlier diagnostics, polynomial regression, and transformations will be leveraged when needed to further analyze and prove that our final model is justified .
+This project focuses on finding a good model for predicting based on the statistical knowledge that we gained from the class. We will try to determine the relationship between different variables, between the chosen predictor variable and price. Furthermore, our goal is  to build a MLR model for used car price prediction where we use price as the response variable, the predictors will be selected from all remaining continuous numerical variables such as (PowerPs, Kilometer, yearRegistrations) and the other  categorical variables so we can make compare 3 different methods so we can arrive to the best model that will fit our prediction. We will also be using the leftover observation to validate our model performance trough examining our assumptions by using regression diagnostic testing. Other method that we will be using are collinearity to check for issues on model and dummy variables for categorical fields. Finally, additional methods such as: outlier diagnostics, polynomial regression, and transformations will be leveraged when needed to further analyze and prove that our final model is justified.
 
 # 2. Methods
 
@@ -73,7 +73,7 @@ Our data clearning process involved removing unuseful variable such as postalCod
 After loading the raw data, **autos_raw** we: 
 
 - Removed data with $price < 0$ 
-- Keep only data with offerType="Angebot" and seller=="privat". 
+- Keep only data with offerType="Angebot" and seller=="privat", 
 - Keep only data with YearOfRegistration>=2000,  
 - Removed unused columns: `r columns_remove`, 
 - Indentify continous numeric columns : `r columns_numeric`
@@ -82,7 +82,7 @@ After loading the raw data, **autos_raw** we:
 #final data format
 str(autos)
 ```
-We need to note that as part of our data cleaning process we had to remove certain aspect of the tied to the different variables that we are using for example, we decide to remove price < $0 because a car cannot be associated with $0 pricing. We also had to keep only the data associated with Type== "Angebot" and seller=="private because 99% percent of the data is associated with these fields. In addition, we narrowed our dataset to include the last 20 years in the Ebay Germany dataset starting with the year 2000, and we also removed unused/unwanted columns in our clearning process then we Identified both the continuous and factor variables upon the completion of our data cleaning process.
+We need to note that as part of our data cleaning process we had to remove certain aspect tied to the different variables that we are using for example, we decide to remove price < $0 because a car cannot be associated with $0 pricing. We also had to keep only the data associated with Type== "Angebot" and seller=="private because 99% percent of the data is associated with these fields. In addition, we narrowed our dataset to include the last 20 years in the Ebay Germany dataset starting with the year 2000, and we also removed unused/unwanted columns in our clearning process then we Identified both the continuous and factor variables upon the completion of our data cleaning process.
 
 ### 2.0.4 Checking colinearity on numberic variable
 Taking a look at the continous variables only - checking for colinearity
@@ -97,7 +97,7 @@ pairs(autos_sample,col="dodgerblue")
 ```{r}
 round(cor(autos_sample), 2)
 ```
-Based on our observation, we have determined there little to no collineararity issues wiht our model
+Based on our observation, we have determined there little to no collineararity issues with our model
 
 ### 2.0.5 Setup training and testing data
 
