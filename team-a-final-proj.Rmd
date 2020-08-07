@@ -28,9 +28,9 @@ Why this Topic?
 
 The formation of our group hinged upon our interest in the automotive industry, as a result of that we have chosen this robust dataset because we wanted to have a better understanding about the used car market and this dataset had all of the components that we wanted to observe for this project.The dataset that I am using in this project was found on Kaggle, the well-known Machine Learning Competition website and it is about Used Car listings from eBay – Germany. 
 
-The Data file contains approximately 370,000 observationsand 20 variables that are scraped from used-car listing on Ebay-Kleinanzeigen (German). The high quantity and authenticity make this dataset useful for an exploratory analysis. Furthermore, the dataset is very large but what we have done to narrow it down is that we have decided to filter the data based on the year registration variable starting the year 2000 to now so we can build a good model based on the last 20 years in the used auto industry in Germany. Some of the of the variables that are very useful tous where price is used as a response to help build model predication when combined with other variables but not limited to : Power, Kilometer, VehicleType, YearRegistration as part of our additive model for this project as you will find out that based on our research we were able to determine whichmodel is sufficient for us to use based on these continuous variables in the dataset.
+The Data file contains approximately 370,000 observations and 20 variables that are scraped from used-car listing on Ebay-Kleinanzeigen (German). The high quantity and authenticity make this dataset useful for an exploratory analysis. Furthermore, the dataset is very large but what we have done to narrow it down is that we have decided to filter the data based on the year registration variable starting the year 2000 to now so we can build a good model based on the last 20 years in the used auto industry in Germany. Some of the of the variables that are very useful tous where price is used as a response to help build model predication when combined with other variables but not limited to : Power, Kilometer, VehicleType, YearRegistration as part of our additive model for this project as you will find out that based on our research we were able to determine whichmodel is sufficient for us to use based on these continuous variables in the dataset.
 
-This project focuses on the exploratory data analysis phase of the dataset. Inparticular, we will try to detect associations between variables, especially against price. The end-goal of such a project would be to build a price-prediction model for vehicles sold by eBay users. This project broke down a lot of the pure concepts that allowed us to bring together the concepts we learned as well as provide background information to understand how these models are determined.
+This project focuses on the exploratory data analysis phase of the dataset. In particular, we will try to detect associations between variables, especially against price. The end-goal of such a project would be to build a price-prediction model for vehicles sold by eBay users. This project broke down a lot of the pure concepts that allowed us to bring together the concepts we learned as well as provide background information to understand how these models are determined.
 
 # 2. Methods
 
@@ -69,31 +69,29 @@ Our data clearning process involved removing unuseful variable such as postalCod
 After loading the raw data, **autos_raw** we: 
 
 - Removed data with $price < 0$ 
-- Keep only data with offerType="Angebot" and seller=="privat". **todo: why?**
-- Keep only data with YearOfRegistration>=2000,  **todo: why?**
-- Removed unused columns: `r columns_remove`,  **todo: why?**
+- Keep only data with offerType="Angebot" and seller=="privat". **The data can either be in the form offertype = "Anagebot" and seller ="private"
+- Keep only data with YearOfRegistration>=2000,  **We narrowed our dataset to include the last 20 years of used cars starting with the year 2000 and beyond
+- Removed unused columns: `r columns_remove`,  **We removed unused/unwanted columns in our cleaning process
 - Indentify continous numeric columns : `r columns_numeric`
 - Indentify factor columns : `r columns_factor`
-
-We have decided to narrow our data to include the last 20 years of used cars starting with the year 2000 which is more useful for us, and also keep the data where offertype = "Anagebot" and seller ="private" and alos removed any unwanted columns within our dataset.
 ```{r}
 #final data format
 str(autos)
 ```
 
-Taking a look at the continous varialbes only - checking for colinearity
+Taking a look at the continous variables only - checking for colinearity
 
 ```{r}
-#Checking colinear on numberic columns on 2000 records sample
-sample_size=2000
+#Checking colinear on numberic columns on 50000 records sample
+sample_size=50000
 idx_sample=sample(1:nrow(autos),sample_size)
 autos_sample= subset (autos[idx_sample,], select = columns_numeric) 
 pairs(autos_sample,col="dodgerblue")
 ```
-
-todo: checking colinear with cor()...
-
-todo: describe observations.
+```{r}
+round(cor(autos_sample), 2)
+```
+Based on our observation, we have determined there little to no collineararity issues wiht our model
 
 ### 2.0.3 Setup training and testing data
 
@@ -140,7 +138,7 @@ model1_selected=model1_bic
 remove_high_influential_points_and_refit_model(model1_selected,autos_train)
 ```
 
-for the following method we pick a data sample_size of 2000 and with fit into an additive model with all of the variables to display the lenght of coef then we ran backward BIC to remove fsome of the predictors then we have a source where we place our functions to pull our model assumption to find out if our model is credible. Based on the results, we have concluded this is not a good model. Fitted Residuals and Q-Q Plots indicated some sort variable tranformations are needed.
+for the following method we pick a data sample_size of 50000 and with fit into an additive model with all of the variables to display the lenght of coef then we ran backward BIC to remove fsome of the predictors then we have a source where we place our functions to pull our model assumption to find out if our model is credible. Based on the results, we have concluded this is not a good model. Fitted Residuals and Q-Q Plots indicated some sort variable tranformations are needed.
 
 ## 2.2  Method 2 - With variable transformations
 
