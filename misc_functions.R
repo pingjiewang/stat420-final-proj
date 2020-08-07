@@ -1,10 +1,11 @@
-
+#Function to find the best transformation of the form considered by the Box-Cox method
 get_boxcox_lambda = function(model1){
   boxcot_out=boxcox(model1, plotit = FALSE, lambda = seq(-0.5, 1.0, by = 0.05))
   lambda=boxcot_out$x[which.max(boxcot_out$y)]
   return(lambda)
 }
 
+#Function to subset the data into groups and considering groups that appear more than 300 times.
 subset_autodata_with_boxcox =function(data,input_formula){
   
   autos_factor_groups=data %>%count(abtest,vehicleType,gearbox,fuelType,notRepairedDamage)
@@ -31,7 +32,7 @@ subset_autodata_with_boxcox =function(data,input_formula){
   return (lambda_bc)
 }
 
-# source("misc_functions.R")
+#Function to remove influential points
 remove_high_influential_points_and_refit_model = function (model, data1){
   ret = list()
   #finding influenctial
@@ -53,9 +54,8 @@ remove_high_influential_points_and_refit_model = function (model, data1){
   return(ret)
 }
 
-
+#Function to plot Fitted vs. Residuals and Q-Q plot
 diagnostics = function(model, pcol="dodgerblue",lcol="orange",alpha=0.05,plotit=TRUE){
-  
   if (plotit ){
     #fitted vs. residual
     par(mfrow=c(1,2))
@@ -69,9 +69,11 @@ diagnostics = function(model, pcol="dodgerblue",lcol="orange",alpha=0.05,plotit=
     
     #QQ plot
     qqnorm(resid(model),main="Normal Q-Q Plot",col=pcol)
-    qqline(resid(model),col=lcol,lwd=1)
-  
+    qqline(resid(model),col=lcol,lwd=1)  
   }
-
 }
 
+#Function to calculate RMSE
+calcrmse  = function(actual, predicted) {
+  sqrt(mean((actual - predicted) ^ 2))
+}
