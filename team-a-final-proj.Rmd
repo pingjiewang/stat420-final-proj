@@ -82,7 +82,7 @@ After loading the raw data, **autos_raw** we:
 #final data format
 str(autos)
 ```
-We need to note that as part of our data cleaning process we had to remove certain aspect of the tied to the different variables that we are using for example, we decide to remove price < $0 because a car cannot be associated with $0 pricing. We also had to keep only the data associated with Type = "Angebot" and seller=="private because 99% percent of the data is associated with these fields. In addition, we narrowed our dataset to include the last 20 years in the Ebay Germany dataset starting with the year 2000, and we also removed unused/unwanted columns in our clearning process then we Identified both the continuous and factor variables upon the completion of our data cleaning process.
+We need to note that as part of our data cleaning process we had to remove certain aspect of the tied to the different variables that we are using for example, we decide to remove price < $0 because a car cannot be associated with $0 pricing. We also had to keep only the data associated with Type== "Angebot" and seller=="private because 99% percent of the data is associated with these fields. In addition, we narrowed our dataset to include the last 20 years in the Ebay Germany dataset starting with the year 2000, and we also removed unused/unwanted columns in our clearning process then we Identified both the continuous and factor variables upon the completion of our data cleaning process.
 
 ### 2.0.4 Checking colinearity on numberic variable
 Taking a look at the continous variables only - checking for colinearity
