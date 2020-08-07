@@ -74,6 +74,6 @@ diagnostics = function(model, pcol="dodgerblue",lcol="orange",alpha=0.05,plotit=
 }
 
 #Function to calculate RMSE
-calcrmse  = function(actual, predicted) {
+calc_rmse  = function(actual, predicted) {
   sqrt(mean((actual - predicted) ^ 2))
 }

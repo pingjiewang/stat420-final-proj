@@ -395,16 +395,16 @@ The resulting model here is the same as the one found in Method 2 Phase 1 (model
     
 *Method 2* resulted in *interaction model* where response variable price was transformed using boxcox transformation. Predictors used in the model include vehicleType, gearbox, powerPS, kilometer, fuelType, notRepairedDamage and yearOfRegistration. Predictors powerPS, yearOfRegistration and kilometer are log transformed.
 
-We use train and test RMSEs to evaluate the chosen 2 models:
+We use *train and test RMSEs* to evaluate the chosen 2 models. Please note that since the interaction model response was transformed, we will have to change it back to its unit of measure by applying reverse transformation. 
 
 ```{r}
 #mod1 RMSEs
-Train_RMSE_mod1 = calcrmse(autos_train$price, predict(model1_selected, autos_train, type = 'response'))
-Test_RMSE_mod1 =  calcrmse(autos_test$price, predict(model1_selected, autos_test,type = 'response'))
+Train_RMSE_mod1 = calc_rmse(autos_train$price, predict(model1_selected, autos_train, type = 'response'))
+Test_RMSE_mod1 =  calc_rmse(autos_test$price, predict(model1_selected, autos_test,type = 'response'))
 
 #mod2 RMSEs
-Train_RMSE_mod2 = calcrmse(autos_train$price, (predict(model2_selected, newdata = autos_train, type ='response')*lambda+1)^(1/lambda))
-Test_RMSE_mod2 = calcrmse(autos_test$price, (predict(model2_selected, newdata = autos_test, type ='response')*lambda+1)^(1/lambda))
+Train_RMSE_mod2 = calc_rmse(autos_train$price, (predict(model2_selected, newdata = autos_train, type ='response')*lambda+1)^(1/lambda))
+Test_RMSE_mod2 = calc_rmse(autos_test$price, (predict(model2_selected, newdata = autos_test, type ='response')*lambda+1)^(1/lambda))
 
 # calculate all train errors
 train_error = c(Train_RMSE_mod1, Train_RMSE_mod2)
@@ -420,6 +420,20 @@ knitr::kable(auto_results)
 As seen from the above table, the transformation model has a lower test and train RMSEs, suggesting it to be a better model.
 
 # 4. Discussion
+
+Using a dataset from Kaggle and using data from the German eBay used car ads, we started by doing significant amounts of data cleaning. We refrained from doing any translations or conversions of data from German language to English due to our limited time for this project. However, we narrowed the size of our data to 100,000 from 370,000, which really helped us to further analyse, inspect, observe and understand the data.
+
+We extracted the continuous variables that are associated with the response variable price. We divided 100,000 records into subsets of training and test dataset, each having 50,000 records.
+
+In *method 1*, we tried fitting an additive model with all variables. Then using BIC backward search, found the model best fitted where predictors chosen were vehicleType, yearOfRegistration, gearbox, powerPS, kilometer, fuelType and notRepairedDamage. This model clearly violated the linearity and constant variance assumption and the normality assumption is also violated as seen from Q-Q plot.
+
+We further removed the influential points and refitted the model. We will use this model for further comparisons.
+
+In *method 2*, we broke the dataset into subgroups by categorizing the variables abtest, vehicleType, gearbox, model, fuelType and brand. For example, abtest can only have either be test or control, and vehicleType can either be Limousine or Kleinwagon. Lastly we picked the groups with more than 300 records in order to find a definitive model for our dataset.
+
+After trying multiple ways like fitting an additive model using only continuos variables, using Box-Cox on a selected group with predictors , applying log transformations and using backward BIC search we finally found a model that might work. It was an interaction model where price was transformed using boxcox transformation and vehicleType, gearbox, powerPS, kilometer, fuelType, notRepairedDamage and yearOfRegistration as predictors.
+
+Results section shows the comparison between additive and interaction models by calculating their test and train RMSEs. Interaction model test and train RMSEs were lower than the additive model showing that interaction model is our preferred model!
 
 # 5. Appendix
 
