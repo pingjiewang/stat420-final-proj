@@ -88,7 +88,7 @@ We need to note that as part of our data cleaning process we had to remove certa
 Taking a look at the continous variables only - checking for colinearity
 
 ```{r}
-#Checking colinear on numberic columns on 50000 records sample
+#Checking colinear on numberic columns on 50,000 records sample
 sample_size=50000
 idx_sample=sample(1:nrow(autos),sample_size)
 autos_sample= subset (autos[idx_sample,], select = columns_numeric) 
@@ -102,7 +102,7 @@ Based on our observation, we have determined there little to no collineararity i
 ### 2.0.5 Setup training and testing data
 
 ```{r}
-#Setup data with 10000 randomly sampled and all columns
+#Setup data with 100,000 randomly sampled and all columns
 training_size=50000
 set.seed(20200807)
 idx_train=sample(1:nrow(autos),training_size)
@@ -155,7 +155,7 @@ model1_selected=model1_bic
 remove_high_influential_points_and_refit_model(model1_selected,autos_train)
 ```
 
-for the following method we pick a data sample_size of 50000 and with fit into an additive model with all of the variables to display the lenght of coef then we ran backward BIC to remove fsome of the predictors then we have a source where we place our functions to pull our model assumption to find out if our model is credible. Based on the results, we have concluded this is not a good model. Fitted Residuals and Q-Q Plots indicated some sort variable tranformations are needed.
+for the following method we pick a data sample_size of 50,000 and with fit into an additive model with all of the variables to display the lenght of coef then we ran backward BIC to remove fsome of the predictors then we have a source where we place our functions to pull our model assumption to find out if our model is credible. Based on the results, we have concluded this is not a good model. Fitted Residuals and Q-Q Plots indicated some sort variable tranformations are needed.
 
 ## 2.2  Method 2 - With variable transformations
 
@@ -185,7 +185,7 @@ nrow(autos_factor_groups)
 #Number of groups with more than 300 records
 sum(autos_factor_groups$n>300)
 ```
-Our data exploration continued though a process of breaking our dataset into subgroups by categorizing with the following variables: abtest, vehicleType, gearbox, model, fuelType and brand. For example abtest can only have either be test or control, and vehicleType can either be Limousine or Kleinwagon, we have picked a number of groups with more than 300 records in order to find a definitive model for our dataset. 
+Our data exploration continued though a process of breaking our dataset into subgroups by categorizing them with the following variables: abtest, vehicleType, gearbox, model, fuelType and brand. For example abtest can only have either be test or control, and vehicleType can either be Limousine or Kleinwagon, we have picked a number of groups with more than 300 records in order to find a definitive model for our dataset. 
 
 #### 2.2.1.2 - work throght one subgroup first. (choose group 2)
 ```{r}
