@@ -445,6 +445,45 @@ knitr::kable(auto_results)
 ```
 As seen from the above table, the transformation model has a lower test and train RMSEs, suggesting it to be a better model.
 
+Calculating coefficient of determination, R2 for the two models:
+
+```{r}
+# 2.2. Total sum of squares
+SST = sum((autos_train$price - mean(autos_train$price))^2)
+#y_hat = predict(model1_selected, newdata = autos_train, type = 'response')
+y_hat = predict(model1_selected)
+
+# 2.4. Residual sum of squares
+SSReg = sum((y_hat - mean(autos_train$price))^2)
+
+R2 = SSReg / SST
+R2
+n = length(resid(model1_selected))
+p = length(coef(model1_selected))
+x = (n-1/n-p)
+z = 1-R2
+adj_R2 = 1-(x*z)
+adj_R2
+
+```
+```{r}
+# 2.2. Total sum of squares
+SST = sum((autos_train$price - mean(autos_train$price))^2)
+y_hat = predict(model2_selected, newdata = autos_train, type = 'response')
+
+# 2.4. Residual sum of squares
+SSReg = sum((y_hat - mean(autos_train$price))^2)
+
+R2 = SSReg / SST
+R2
+n = length(resid(model1_selected))
+p = length(coef(model1_selected))
+x = (n-1/n-p)
+z = 1-R2
+adj_R2 = 1-(x*z)
+adj_R2
+```
+
 # 4. Discussion
 
 Using a dataset from Kaggle and using data from the German eBay used car ads, we started by doing significant amounts of data cleaning. We refrained from doing any translations or conversions of data from German language to English due to our limited time for this project. However, we narrowed the size of our data to 100,000 from 370,000, which really helped us to further analyse, inspect, observe and understand the data.
