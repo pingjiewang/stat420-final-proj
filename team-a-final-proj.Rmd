@@ -370,6 +370,27 @@ summary(model2_selected)
 par(mfrow=c(1,2))
 plot(model2_selected)
 
+# function to evaluate rmse
+rmse  = function(actual, predicted) {
+  sqrt(mean((actual - predicted) ^ 2))
+}
+
+# calculate all train errors
+train_error = c(
+  rmse(autos_train$price, predict(model1_selected, autos_train, type = 'response')),
+  rmse(autos_train$price, predict(model2_selected, autos_train, type = 'response'))
+)
+
+# calculate all test errors
+test_error = c(
+  rmse(autos_test$price, predict(model1_selected, autos_test,type = 'response')),
+  rmse(autos_test$price, predict(model2_selected, autos_test,type = 'response'))
+)
+
+auto_models = c("`Additive model`", "`Transformation model`")
+auto_results = data.frame(auto_models, train_error, test_error)
+colnames(auto_results) = c("Model", "Train RMSE", "Test RMSE")
+knitr::kable(auto_results)
 ```
 
 
