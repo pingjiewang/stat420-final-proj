@@ -486,19 +486,24 @@ adj_R2
 
 # 4. Discussion
 
-Using a dataset from Kaggle and using data from the German eBay used car ads, we started by doing significant amounts of data cleaning. We refrained from doing any translations or conversions of data from German language to English due to our limited time for this project. However, we narrowed the size of our data to 100,000 from 370,000, which really helped us to further analyse, inspect, observe and understand the data.
+Using a dataset from Kaggle that contains German eBay used car ads, we started by doing some of data cleaning to remove unreasonable data from the dataset. We refrained from doing any translations or conversions of data from German language to English due to our limited time for this project. Furthermore, We created one training dataset consists of 50,000 randomly sampled record and another testing the same size. 
 
-We extracted the continuous variables that are associated with the response variable price. We divided 100,000 records into subsets of training and test dataset, each having 50,000 records.
+Moreover, we tried three different modeling approach and generated 2 candidate model. Below are the following methods that we have explored:
 
-In *method 1*, we tried fitting an additive model with all variables. Then using BIC backward search, found the model best fitted where predictors chosen were vehicleType, yearOfRegistration, gearbox, powerPS, kilometer, fuelType and notRepairedDamage. This model clearly violated the linearity and constant variance assumption and the normality assumption is also violated as seen from Q-Q plot.
+In *method 1*, we tried fitting an Additive Model with all variables. Then using BIC backward search, found the model best fitted where predictors chosen were vehicleType, yearOfRegistration, gearbox, powerPS, kilometer, fuelType and notRepairedDamage. This model clearly violated the linearity and constant variance assumption and the normality assumption is also violated as seen from Q-Q plot. With this method we generate a candidate model which we referred as to the Additive Model.
 
-We further removed the influential points and refitted the model. We will use this model for further comparisons.
+In *method 2*, We introduced variable transformations with the following 2-phases approach:
 
-In *method 2*, we broke the dataset into subgroups by categorizing the variables abtest, vehicleType, gearbox, model, fuelType and brand. For example, abtest can only have either be test or control, and vehicleType can either be Limousine or Kleinwagon. Lastly we picked the groups with more than 300 records in order to find a definitive model for our dataset.
+- Phase 1 - Use the only continuous variables to determine the response transformation using Box-Cox and the predictor transformation using BIC backward search. 
 
-After trying multiple ways like fitting an additive model using only continuos variables, using Box-Cox on a selected group with predictors , applying log transformations and using backward BIC search we finally found a model that might work. It was an interaction model where price was transformed using boxcox transformation and vehicleType, gearbox, powerPS, kilometer, fuelType, notRepairedDamage and yearOfRegistration as predictors.
+- Phase 2 - Adding categorical variables to the model format obtained from Phase 1. 
 
-Results section shows the comparison between additive and interaction models by calculating their test and train RMSEs. Interaction model test and train RMSEs were lower than the additive model showing that interaction model is our preferred model!
+The chosen model in Method 2 uses price as transformed using Box-Cox transformation with the following predictors: vehicleType, yearOfRegistration, gearbox, powerPS, kilometer, fuelType, notRepairedDamage as predictors. It also included non-linear terms of log(powerPS), powerPS^2, log(yearOfRegistration), and log(kilometer). We referred to this model as the Transformation Model.
+
+In *method 3*,  We started with the chosen model from Method 2 and   added two-way interaction terms in order to find a new candidate model, using backward BIC search. However, the Interaction method that we have tried, yielded the same results in method 2.
+
+
+Results section shows the comparison between additive and transformation models by calculating their test and train RMSEs. Based on the result for both models, the RMSE is only slightly higher than the training RMSE which indicates that we do not have overfitting issue with the model. The tranformation model test and train RMSEs were 25% to 30% lower than the additive model showing that the transformation model is our preferred model. Furthermore, the second model is smaller in size. 
 
 # 5. Appendix
 
