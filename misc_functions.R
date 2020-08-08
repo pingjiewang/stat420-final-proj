@@ -5,33 +5,6 @@ get_boxcox_lambda = function(model1){
   return(lambda)
 }
 
-#Function to subset the data into groups and considering groups that appear more than 300 times.
-subset_autodata_with_boxcox =function(data,input_formula){
-  
-  autos_factor_groups=data %>%count(abtest,vehicleType,gearbox,fuelType,notRepairedDamage)
-  autos_factor_groups=autos_factor_groups[order(autos_factor_groups$n,decreasing = TRUE),]
-  autos_factor_groups=autos_factor_groups[autos_factor_groups$n>300,]
-  nGroup=nrow(autos_factor_groups)
-  #nGroup=5
-  lambda_bc=rep(0,nGroup)
-  
-  for (g in 1:nGroup){
-    group1=autos_factor_groups[g,]
-    group1.size = group1$n
-    group1=subset(group1, select = -c(n) )
-    
-    autos_1=data
-    cols=names(group1)
-    for (i in 1:ncol(group1)){
-      idx = autos_1[,cols[i]]==group1[[i]]
-      autos_1=autos_1[idx,]
-    }
-    model = lm(input_formula, data = autos_1,y=TRUE, qr=TRUE)
-    lambda_bc[g] = get_boxcox_lambda(model)
-  }
-  return (lambda_bc)
-}
-
 #Function to remove influential points
 remove_high_influential_points_and_refit_model = function (model, data1){
   ret = list()
