@@ -445,44 +445,48 @@ knitr::kable(auto_results)
 ```
 As seen from the above table, the transformation model has a lower test and train RMSEs, suggesting it to be a better model.
 
-Calculating coefficient of determination, R2 for the two models:
+We will now compare the 2 models using coefficient of determination R2, adjusted R2:
 
 ```{r}
-# 2.2. Total sum of squares
-SST = sum((autos_train$price - mean(autos_train$price))^2)
-#y_hat = predict(model1_selected, newdata = autos_train, type = 'response')
-y_hat = predict(model1_selected)
-
-# 2.4. Residual sum of squares
-SSReg = sum((y_hat - mean(autos_train$price))^2)
-
-R2 = SSReg / SST
-R2
-n = length(resid(model1_selected))
-p = length(coef(model1_selected))
-x = (n-1/n-p)
-z = 1-R2
-adj_R2 = 1-(x*z)
-adj_R2
-
+summary(model1_selected)
+summary(model1_selected)$adj.r.squared
 ```
+
+Since this is an additive model, several interpretations can be made from the summary results. As the year of registration increase by one, the price increases by 900 euros. As the kilometers driven by the car increases by one, the price decreases slightly by 0.3829 euros, which sounds correct.  
+
 ```{r}
-# 2.2. Total sum of squares
+#Calculating R2 for additive model
+#Total sum of squares
 SST = sum((autos_train$price - mean(autos_train$price))^2)
-y_hat = predict(model2_selected, newdata = autos_train, type = 'response')
 
-# 2.4. Residual sum of squares
-SSReg = sum((y_hat - mean(autos_train$price))^2)
-
-R2 = SSReg / SST
-R2
-n = length(resid(model1_selected))
-p = length(coef(model1_selected))
-x = (n-1/n-p)
-z = 1-R2
-adj_R2 = 1-(x*z)
-adj_R2
+#Residual sum of squares
+fitted = predict(model1_selected, newdata = autos_train)
+SSReg = sum((fitted - mean(autos_train$price))^2)
+(R2 = SSReg / SST)
 ```
+
+
+```{r}
+summary(model2_selected)
+summary(model2_selected)$adj.r.squared
+```
+
+```{r}
+#Calculating R2 for transformation model
+fitted = (predict(model2_selected, newdata = autos_train)*lambda+1)^(1/lambda)
+
+#Residual sum of squares
+SSReg = sum((fitted - mean(autos_train$price))^2)
+
+(R2 = SSReg / SST)
+```
+
+|                      | R2     | Adjusted R2 |
+|----------------------|--------|-------------|
+| Additive model       | 0.5454 | 0.5452      |
+| Transformation model | 0.6202 | 0.8248      |
+
+Transformation model has a higher R2 than the Additive model, however that can be the case because transformation is a bigger model with 21 coefficients, compared to additive model that has 19 coefficients. But by checking adjusted R2, we can confirm that transformation model indeed is a preferred model.
 
 # 4. Discussion
 
