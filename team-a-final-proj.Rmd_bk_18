@@ -25,43 +25,13 @@ knitr::opts_chunk$set(fig.width=10)
 
 # 1. Introduction
 
+Why this Topic?
+
 The formation of our group hinged upon our interest in the automotive industry, as a result of that we have chosen this robust dataset because we wanted to have a better understanding about the used car market and this dataset had all of the components that we wanted to observe for this project.The dataset that I am using in this project was found on Kaggle, the well-known Machine Learning Competition website and it is about Used Car listings from eBay – Germany. 
 
-The dataset we are using for this project was found on Kaggle, the well-known Machine Learning Competition website and it is about Used Car listings from eBay – Germany please see link here: https://www.kaggle.com/orgesleka/used-cars-database/home. 
+The dataset we are using for this project was found on Kaggle, the well-known Machine Learning Competition website and it is about Used Car listings from eBay – Germany please see link here: https://www.kaggle.com/orgesleka/used-cars-database/home. Data file contains approximately 370,000 observations and 20 variables that are scraped from used-car listing on Ebay-Kleinanzeigen (German). The high quantity and authenticity make this dataset useful for an exploratory analysis. Furthermore, the dataset is very large but what we have done to narrow it down is that we have decided to filter the data based on the year registration variable starting the year 2000 to now so we can build a good model based on the last 20 years in the used auto industry in Germany. Furthermore, we randomly sampled 100,000 records after our data cleaning process, and split half the data in our training dataset and test dataset which resulted in 50,000 records each for our model prediction. Some of the of the variables that are very useful to us where price is used as a response to help build model predication when combined it with other variables but not limited to: Power, Kilometer, VehicleType, YearRegistration as part of our additive and transformation model for this project. 
 
-* Data file contains approximately **370,000 observations** and **20 variables** that are scraped from used-car listing on Ebay-Kleinanzeigen (German). The high quantity and authenticity makes this dataset useful for an exploratory analysis.
-
-* Below is the list of various variables associated with the dataset:
-  * **name**: Name of the car
-  * **abtest**: Indicates the A/B testing group used by ebay website team
-  *	**seller**: Whether the seller is private or a dealer
-  *	**offerType**: The type of listing
-  * **price**: The price on the ad to sell the car.
-  * **vehicleType**: The vehicle Type.
-  * **yearOfRegistration**: The year in which year the car was first registered.
-  * **gearbox**: The transmission type.
-  * **powerPS**: The power of the car in PS.
-  * **model**: The car model name.
-  * **kilometer**: How many kilometers the car has driven.
-  * **monthOfRegistration**: The month in which year the car was first registered.
-  * **fuelType**: What type of fuel the car uses.
-  * **brand**: The brand of the car.
-  * **notRepairedDamage**: If the car has a damage which is not yet repaired.
-  * **postalCode**: The postal code for the location of the vehicle.
-  
-* We considered cars that were registered after the year 2000, so we can build a good model based on the last 20 years in the used auto industry in Germany. 
-* We randomly sampled 100,000 records after our data cleaning process, and split half the data in our training dataset and test dataset which resulted in 50,000 records each for our model prediction. We used below variables for our final analysis. 
-  * **price**: The price on the ad to sell the car.
-  * **abtest**: Indicates the A/B testing group used by ebay website team
-  * **vehicleType**: The vehicle Type.
-  * **yearOfRegistration**: The year in which year the car was first registered.
-  * **gearbox**: The transmission type.
-  * **powerPS**: The power of the car in PS.
-  * **kilometer**: How many kilometers the car has driven.
-  * **fuelType**: What type of fuel the car uses.
-  * **notRepairedDamage**: If the car has a damage which is not yet repaired.
- 
-This project focuses on finding a good model for predicting based on the statistical knowledge that we gained from the class. We tried to determine the relationship between different variables, between the chosen predictor variable and price. Furthermore, our goal is  to build a MLR model for used car price prediction where we use price as the response variable, the predictors will be selected from all remaining continuous numerical variables such as (PowerPs, Kilometer, yearRegistrations) and the other  categorical variables so we can make compare 2 different methods so we can arrive to the best model that will fit our prediction. We will also be using the leftover observations to validate our model performance trough examining our assumptions by using regression diagnostic testing. Other method that we will be using are collinearity to check for issues on model and dummy variables for categorical fields. Finally, additional methods such as: outlier diagnostics, polynomial regression, and transformations will be leveraged when needed to further analyze and prove that our final model is justified.
+This project focuses on finding a good model for predicting based on the statistical knowledge that we gained from the class. We will try to determine the relationship between different variables, between the chosen predictor variable and price. Furthermore, our goal is  to build a MLR model for used car price prediction where we use price as the response variable, the predictors will be selected from all remaining continuous numerical variables such as (PowerPs, Kilometer, yearRegistrations) and the other  categorical variables so we can make compare 3 different methods so we can arrive to the best model that will fit our prediction. We will also be using the leftover observation to validate our model performance trough examining our assumptions by using regression diagnostic testing. Other method that we will be using are collinearity to check for issues on model and dummy variables for categorical fields. Finally, additional methods such as: outlier diagnostics, polynomial regression, and transformations will be leveraged when needed to further analyze and prove that our final model is justified.
 
 # 2. Methods
 
@@ -102,18 +72,23 @@ columns_factor = c("abtest","vehicleType","gearbox","fuelType","notRepairedDamag
 autos=na.omit(autos)
 autos = autos[, -which(names(autos) %in% columns_remove)]
 ```
-Our data cleaning process involved removing not-so-useful variables such as postalCode, lastSeen, name etc.. and clean the data by removing NAs and other values that might be not of significance.
+Our data clearning process involved removing unuseful variable such as postalCode, lastSeen, name ect.. and minize to some of the useful variable that we could use which includes the numerical and factor variables.
 
 After loading the raw data, **autos_raw** we: 
 
-- Removed data with $price < 0$ (because a car cannot be associated with $0 pricing)
-- Keep only data with offerType="Angebot" and seller=="privat", (because 99% percent of the data is associated with these values) 
-- Keep only data with YearOfRegistration>=2000, (to focus only on last 20 years worth of registered cars)
-- Removed unused columns: `r columns_remove`, (for better analysis and predictions)
-- Identify continous numeric columns : `r columns_numeric`, (to help with our methods)
-- Identify factor columns : `r columns_factor`, (to help with our methods)
+- Removed data with $price < 0$ 
+- Keep only data with offerType="Angebot" and seller=="privat", 
+- Keep only data with YearOfRegistration>=2000,  
+- Removed unused columns: `r columns_remove`, 
+- Indentify continous numeric columns : `r columns_numeric`
+- Indentify factor columns : `r columns_factor`
+```{r}
+#final data format
+str(autos)
+```
+We need to note that as part of our data cleaning process we had to remove certain aspect tied to the different variables that we are using for example, we decide to remove price < $0 because a car cannot be associated with $0 pricing. We also had to keep only the data associated with Type== "Angebot" and seller=="private because 99% percent of the data is associated with these fields. In addition, we narrowed our dataset to include the last 20 years in the Ebay Germany dataset starting with the year 2000, and we also removed unused/unwanted columns in our clearning process then we Identified both the continuous and factor variables upon the completion of our data cleaning process.
 
-### 2.0.4 Checking collinearity on numberic variable
+### 2.0.4 Checking colinearity on numberic variable
 Taking a look at the continuous variables only - checking for collinearity
 
 ```{r}
@@ -126,8 +101,11 @@ pairs(autos_sample,col="dodgerblue")
 ```{r}
 round(cor(autos_sample), 2)
 ```
-
-Based on the above Pair plot and the output of cor() function, we have determined there no significant collinearity issues. Therefore, we can proceed to include all continuous variables (except for Price) as model predictors.
+<<<<<<< HEAD
+Based on the above observation, we have determined there is little or no collinearity issues. Therefore, we can proceed to include all continuous variables (except for Price) as model predictors.
+=======
+Based on our observation, we have determined there little to no collineararity issues with our model
+>>>>>>> 073e00dd68ad603815d0e07c54729d2ab09ec175
 
 ### 2.0.5 Setup training and testing data
 
@@ -191,9 +169,13 @@ Based on the plot results, we concluded this is not a good model as the Fitted R
 remove_high_influential_points_and_refit_model(model1_selected,autos_train)
 ```
 
-Removing the high influential points (about 3% of observations) does improve the model a little. But it is still not ideal. We will save the model (model1_selected) as the first candidate model. In the result section, we will compare its performance with other candidate models. 
+<<<<<<< HEAD
+Removing the high influential points (about 3% of observation) does improve the model a little. But it is still not ideal. We willsave the model (model1_selected) as the first candidate model. In the result section, we will compare its performance with other candidate models. 
 
-Because there seems to be a violation of the linearity assumption here, we will introduce response and predictor transformation in the next method.
+Because there seems to be a violation of the linearity assumption, we will introduce response and predictor transformation in the next method.
+=======
+for the following method we pick a data sample_size of 50,000 and with fit into an additive model with all of the variables to display the lenght of coef then we ran backward BIC to remove fsome of the predictors then we have a source where we place our functions to pull our model assumption to find out if our model is credible. Based on the results, we have concluded this is not a good model. Fitted Residuals and Q-Q Plots indicated some sort variable tranformations are needed.
+>>>>>>> 073e00dd68ad603815d0e07c54729d2ab09ec175
 
 ## 2.2  Method 2 - With variable transformations
 
@@ -207,7 +189,7 @@ In this second approach to finding a good price prediction model, we will introd
 
 #### 2.2.1.1 - Break data-set into subgroups by fixing factor variable values
 
-To reduce the price variability due to different combinations of factor variable values, we will temporarily isolate a dataset for the analysis here in phase 1. Later, we will use the full training dataset in Phase 2 steps. To do this, we will use 'dplyr' package count() to group dataset by all factor variables. 
+To reduce the price variability due to different combinations of factor variable values, we will temporarily isolate a dataset for the analysis phase. Later, we will use the full training dataset in Phase 2 steps. To do this, we will use 'dplyr' package count() to group dataset by all factor variables. 
 
 ```{r}
 #listing out all factor columns
@@ -225,8 +207,12 @@ nrow(autos_factor_groups)
 #Number of groups with more than 300 records
 sum(autos_factor_groups$n>300)
 ```
+<<<<<<< HEAD
+=======
+Our data exploration continued though a process of breaking our dataset into subgroups by categorizing them with the following variables: abtest, vehicleType, gearbox, model, fuelType and brand. For example abtest can only have either be test or control, and vehicleType can either be Limousine or Kleinwagon, we have picked a number of groups with more than 300 records in order to find a definitive model for our dataset. 
+>>>>>>> 073e00dd68ad603815d0e07c54729d2ab09ec175
 
-Next, we will break our dataset into groups, we will choose group #2 to isolate a dataset by filtering from the main dataset.
+Next, we will break our dataset into groups, we choose group #2 to isolate a dataset by filtering from the main dataset.
 
 #### 2.2.1.2 - isolate a subset data (autos_1) for Phase 1 
 ```{r}
@@ -420,16 +406,16 @@ The resulting model here is the same as the one found in Method 2 Phase 1 (model
     
 *Method 2* resulted in *interaction model* where response variable price was transformed using boxcox transformation. Predictors used in the model include vehicleType, gearbox, powerPS, kilometer, fuelType, notRepairedDamage and yearOfRegistration. Predictors powerPS, yearOfRegistration and kilometer are log transformed.
 
-We use *train and test RMSEs* to evaluate the chosen 2 models. Please note that since the interaction model response was transformed, we will have to change it back to its unit of measure by applying reverse transformation. 
+We use train and test RMSEs to evaluate the chosen 2 models:
 
 ```{r}
 #mod1 RMSEs
-Train_RMSE_mod1 = calc_rmse(autos_train$price, predict(model1_selected, autos_train))
-Test_RMSE_mod1 =  calc_rmse(autos_test$price, predict(model1_selected, autos_test))
+Train_RMSE_mod1 = calcrmse(autos_train$price, predict(model1_selected, autos_train, type = 'response'))
+Test_RMSE_mod1 =  calcrmse(autos_test$price, predict(model1_selected, autos_test,type = 'response'))
 
 #mod2 RMSEs
-Train_RMSE_mod2 = calc_rmse(autos_train$price, (predict(model2_selected, newdata = autos_train)*lambda+1)^(1/lambda))
-Test_RMSE_mod2 = calc_rmse(autos_test$price, (predict(model2_selected, newdata = autos_test)*lambda+1)^(1/lambda))
+Train_RMSE_mod2 = calcrmse(autos_train$price, (predict(model2_selected, newdata = autos_train, type ='response')*lambda+1)^(1/lambda))
+Test_RMSE_mod2 = calcrmse(autos_test$price, (predict(model2_selected, newdata = autos_test, type ='response')*lambda+1)^(1/lambda))
 
 # calculate all train errors
 train_error = c(Train_RMSE_mod1, Train_RMSE_mod2)
@@ -442,70 +428,9 @@ auto_results = data.frame(auto_models, train_error, test_error)
 colnames(auto_results) = c("Model", "Train RMSE", "Test RMSE")
 knitr::kable(auto_results)
 ```
-
 As seen from the above table, the transformation model has a lower test and train RMSEs, suggesting it to be a better model.
 
-We will now compare the 2 models using coefficient of determination R2, adjusted R2:
-
-```{r}
-summary(model1_selected)
-summary(model1_selected)$adj.r.squared
-```
-
-Since this is an additive model, several interpretations can be made from the summary results. As the year of registration increase by one, the price increases by 900 euros. As the kilometers driven by the car increases by one, the price decreases slightly by 0.3829 euros, which sounds correct.  
-
-```{r}
-#Calculating R2 for additive model
-#Total sum of squares
-SST = sum((autos_train$price - mean(autos_train$price))^2)
-
-#Residual sum of squares
-fitted = predict(model1_selected, newdata = autos_train)
-SSReg = sum((fitted - mean(autos_train$price))^2)
-(R2 = SSReg / SST)
-```
-
-
-```{r}
-summary(model2_selected)
-summary(model2_selected)$adj.r.squared
-```
-
-```{r}
-#Calculating R2 for transformation model
-fitted = (predict(model2_selected, newdata = autos_train)*lambda+1)^(1/lambda)
-
-#Residual sum of squares
-SSReg = sum((fitted - mean(autos_train$price))^2)
-
-(R2 = SSReg / SST)
-```
-
-|                      | R2     | Adjusted R2 | Comment
-|----------------------|--------|-------------|---------
-| Additive model       | 0.5454 | 0.5452      | Preferred for relationship explanation 
-| Transformation model | 0.6202 | 0.8248      | Preferred for price prediction
-
-Transformation model has a higher R2 than the Additive model, however that can be the case because transformation is a bigger model with 21 coefficients, compared to additive model that has 19 coefficients. But by checking adjusted R2, we can confirm that transformation model indeed is a preferred model.
-
 # 4. Discussion
-
-Using a dataset from Kaggle that contains German eBay used car ads, we started by doing some of the data-cleaning to remove unreasonable data from the dataset. We refrained from doing any translations or conversions of data from the German language to English due to our limited time for this project. Furthermore, We created one training dataset consists of 50,000 randomly sampled records, and another testing dataset the same size.
-Moreover, we tried three different modeling approaches and generated two candidate models. Below are the following methods that we have explored:
-
-In Method 1, we tried fitting an Additive Model with all variables. Using BIC backward search, found the best model where chosen predictors were vehicleType, yearOfRegistration, gearbox, powerPS, kilometer, fuelType and notRepairedDamage. This model violated the linearity,  constant variance assumptions, and the normality assumption was also violated, as seen from the Q-Q plot. With this method, we generate a candidate model, which we referred to as the Additive Model.
-
-In Method 2, We introduced variable transformations with the following 2-phases approach:
-
-- Phase 1 - Use the only continuous variables to determine the response transformation using Box-Cox and the predictor transformation using BIC backward search.
-
-- Phase 2 - Adding categorical variables to the model format obtained from Phase 1.
-
-The chosen model in Method 2 used Box-Cox to transform the response(Price). The model includes the following predictors: vehicleType, yearOfRegistration, gearbox, powerPS, kilometer, fuelType, and notRepairedDamage.  It also included non-linear terms of log(powerPS), powerPS^2, log(yearOfRegistration), and log(kilometer). We referred to this model as the Transformation Model.
-
-In Method 3, We started with the chosen model from Method 2 and added two-way interaction terms to find a new candidate model using a backward BIC search. However, this method yielded the same results as Method 2.
-
-The results section shows the comparison between the Additive and Transformation models by calculating their test and training RMSEs. Based on both models' results, the RMSE is only slightly higher than the training RMSE, which indicates that we do not have an overfitting issue with the model. The Transformation model test and training RMSEs were 25% to 30% lower than the additive model showing that the transformation model is our preferred model for price prediction. However,  we prefer the Additive model for explaining the relationship between the price and predictors.  Because it is simpler and does not have any variable transformations, it doesn't include additional non-linear terms.
 
 # 5. Appendix
 
